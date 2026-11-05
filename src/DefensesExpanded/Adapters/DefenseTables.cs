@@ -67,7 +67,8 @@ internal sealed class DefenseTables
 
         if (ReferenceEquals(settings, _appliedSettings) && _seen.AsSpan().SequenceEqual(_applied)) return;
 
-        var isChange = _appliedSettings != null && !ReferenceEquals(settings, _appliedSettings);
+        var previous = _appliedSettings;
+        var isChange = previous != null && !ReferenceEquals(settings, previous);
 
         _seen.CopyTo(_applied, 0);
         _appliedSettings = settings;
@@ -75,7 +76,7 @@ internal sealed class DefenseTables
         var written = Write(config, tables, english, chinese, settings);
 
         // A defense placed in this run took its numbers when it was built; a change brings it up to the new ones.
-        if (isChange && written.Count > 0) Step("defenses already placed", () => RefreshPlaced(config, written));
+        if (isChange && written.Count > 0) Step("defenses already placed", () => RefreshPlaced(config, written, previous!, settings));
     }
 
     private List<DefenseKind> Write(ConfigManager config, Tables tables, Il2CppDictionary.Dictionary<string, string> english, Il2CppDictionary.Dictionary<string, string> chinese, IReadOnlyList<DefenseSettings> settings)
@@ -194,8 +195,13 @@ internal sealed class DefenseTables
     /// Gives the placed defenses of these kinds the numbers in their rows now: their fighting numbers, their health (in
     /// the same share of the new most as before), and a place among the game's shooters for one that now attacks.
     /// </summary>
-    private void RefreshPlaced(ConfigManager config, IReadOnlyList<DefenseKind> kinds)
+    private void RefreshPlaced(ConfigManager config, IReadOnlyList<DefenseKind> kinds, IReadOnlyList<DefenseSettings> before, IReadOnlyList<DefenseSettings> now)
     {
+        var health = new Dictionary<int, (int Old, int New)>();
+
+        for (var i = 0; i < DefenseRows.All.Count && i < before.Count && i < now.Count; i++)
+            health[DefenseRows.All[i].Ids.Furniture] = (before[i].Health, now[i].Health);
+
         var world = GameSingleton.Existing<BattleLogicWorld>();
         var furnitures = world?._AgentManager?.GetAllFurnitures();
 
@@ -220,18 +226,14 @@ internal sealed class DefenseTables
                 device.AttackTimerSeconds = timer;
             }
 
-            if (AgentTools.GetAgentComponent<FurnitureDurabilityComponent>(furniture) is { } durability && config.Get_Config_Furniture(id) is { } row)
+            // Only a change of the Health setting moves its health, by that setting's own ratio: the most it has now
+            // can carry a talent's bonus over the row, which the game adds back but does not refill.
+            if (health.TryGetValue(id, out var change) && change.Old != change.New && AgentTools.GetAgentComponent<FurnitureDurabilityComponent>(furniture) is { } durability)
             {
-                var max = Math.Max(1, row.FurnitureHPMax);
-                var oldMax = durability.MaxDurability;
+                var (max, current) = HealthScale.Rescale(durability.MaxDurability, durability.CurrentDurability, change.Old, change.New);
 
-                if (max != oldMax)
-                {
-                    var current = oldMax > 0 ? (int)Math.Round((double)durability.CurrentDurability * max / oldMax) : max;
-
-                    durability.SetMaxDurability(max);
-                    durability.SetCurrentDurability(Math.Clamp(current, 0, max));
-                }
+                durability.SetMaxDurability(max);
+                durability.SetCurrentDurability(current);
             }
 
             count++;

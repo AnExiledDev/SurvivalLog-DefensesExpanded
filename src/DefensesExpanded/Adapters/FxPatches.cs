@@ -31,7 +31,7 @@ internal static class FxPatches
                 return;
             }
 
-            harmony.Patch(target, prefix: new HarmonyMethod(typeof(FxPatches), nameof(AsStock)), postfix: new HarmonyMethod(typeof(FxPatches), nameof(AsOurs)));
+            harmony.Patch(target, prefix: new HarmonyMethod(typeof(FxPatches), nameof(AsStock)), finalizer: new HarmonyMethod(typeof(FxPatches), nameof(AsOurs)));
         }
         catch (Exception ex)
         {
@@ -56,7 +56,9 @@ internal static class FxPatches
         }
     }
 
-    private static void AsOurs(AgentModel __0, int __state)
+    // A finalizer, so the id comes back even when the game's own step throws; returning null lets the game's
+    // exception through as it was.
+    private static Exception? AsOurs(AgentModel __0, int __state, Exception? __exception)
     {
         try
         {
@@ -66,6 +68,8 @@ internal static class FxPatches
         {
             Fail(ex);
         }
+
+        return __exception;
     }
 
     private static void Fail(Exception ex)

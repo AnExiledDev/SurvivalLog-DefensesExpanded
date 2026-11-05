@@ -14,7 +14,7 @@ namespace DefensesExpanded;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensesexpanded";
-    private const string Version = "0.1.0";
+    private const string Version = "0.1.1";
 
     public override void Load()
     {

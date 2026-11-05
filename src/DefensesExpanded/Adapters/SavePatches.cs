@@ -38,7 +38,14 @@ internal static class SavePatches
 
             var fields = Read(__0);
 
-            if (SaveTwin.ToStock(ref fields, DefenseRows.All)) Write(__0, fields);
+            if (!SaveTwin.ToStock(ref fields, DefenseRows.All)) return;
+
+            Write(__0, fields);
+
+            // Getting ready to remove the mod: a placed defense saved with more health than its stock twin can hold
+            // would load without the mod over the most, so it is saved at that most.
+            if (UninstallPrep.IsOn && !fields.IsBagFurniture && GameSingleton.Existing<ConfigManager>()?.Get_Config_Furniture(fields.AgentConfigId) is { } stock && stock.FurnitureHPMax > 0 && __0.FurnitureDurability > stock.FurnitureHPMax)
+                __0.FurnitureDurability = stock.FurnitureHPMax;
         }
         catch (Exception ex)
         {
