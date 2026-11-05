@@ -244,7 +244,23 @@ internal sealed class DefenseTables
         // The game lists its shooters, walls and walk-over defenses once and lists them again when this is cleared.
         if (world._TowerCombatManager is { } combat) combat.deviceScanDone = false;
 
+        // The game keeps its list of powered furniture until something is placed or removed, and only that list draws
+        // power, so a defense whose power cost went from 0 to more (or back) would not join or leave it until a reload.
+        if (PowerCostChanged(before, now))
+        {
+            world._AgentManager?.InvalidateHomeElecCache();
+            world._PowerManager?.ForceUpdatePanel();
+        }
+
         _log($"{count} placed defenses brought up to the new settings");
+    }
+
+    private static bool PowerCostChanged(IReadOnlyList<DefenseSettings> before, IReadOnlyList<DefenseSettings> now)
+    {
+        for (var i = 0; i < before.Count && i < now.Count; i++)
+            if (before[i].PowerCost != now[i].PowerCost) return true;
+
+        return false;
     }
 
     private void KeepReveals(Il2CppDictionary.Dictionary<int, Config_ProductionList> recipes, IReadOnlyList<DefenseKind> kinds)
