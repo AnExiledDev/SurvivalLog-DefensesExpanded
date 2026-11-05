@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>DefensesExpanded</AssemblyName>
+    <RootNamespace>DefensesExpanded</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GameDir Condition="'$(GameDir)' == ''">D:\SteamLibrary\steamapps\common\Survival Log</GameDir>
+    <BepInExCore>$(GameDir)\BepInEx\core</BepInExCore>
+    <Interop>$(GameDir)\BepInEx\interop</Interop>
+    <ToolkitDll Condition="'$(ToolkitDll)' == ''">D:\devnew\game-mods\SurvivalLog\mods\sl-exiled-toolkit\src\ExiledToolkit\bin\Release\ExiledToolkit.dll</ToolkitDll>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="$(BepInExCore)\BepInEx.Core.dll" Private="false" />
+    <Reference Include="$(BepInExCore)\BepInEx.Unity.IL2CPP.dll" Private="false" />
+    <Reference Include="$(BepInExCore)\0Harmony.dll" Private="false" />
+    <Reference Include="$(BepInExCore)\Il2CppInterop.Runtime.dll" Private="false" />
+    <Reference Include="$(BepInExCore)\Il2CppInterop.Common.dll" Private="false" />
+    <Reference Include="$(Interop)\HotUpdate.dll" Private="false" />
+    <Reference Include="$(Interop)\Il2Cppmscorlib.dll" Private="false" />
+    <Reference Include="$(Interop)\Il2CppSystem.Core.dll" Private="false" />
+    <Reference Include="$(Interop)\UnityEngine.CoreModule.dll" Private="false" />
+    <Reference Include="$(Interop)\UnityEngine.PhysicsModule.dll" Private="false" />
+    <Reference Include="$(Interop)\AOT.dll" Private="false" />
+    <Reference Include="$(ToolkitDll)" Private="false" />
+  </ItemGroup>
+
+  <!-- The defenses' models and icons travel inside the DLL, so installing the mod is still one file. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\assets\ConcreteBarrier.glb" LogicalName="ConcreteBarrier.glb" />
+    <EmbeddedResource Include="..\..\assets\UI_Item_Icon_ConcreteBarrier.png" LogicalName="UI_Item_Icon_ConcreteBarrier.png" />
+    <EmbeddedResource Include="..\..\assets\BarbedWire.glb" LogicalName="BarbedWire.glb" />
+    <EmbeddedResource Include="..\..\assets\UI_Item_Icon_BarbedWire.png" LogicalName="UI_Item_Icon_BarbedWire.png" />
+    <EmbeddedResource Include="..\..\assets\SpikePlate.glb" LogicalName="SpikePlate.glb" />
+    <EmbeddedResource Include="..\..\assets\UI_Item_Icon_SpikePlate.png" LogicalName="UI_Item_Icon_SpikePlate.png" />
+    <EmbeddedResource Include="..\..\assets\NailGunTurret.glb" LogicalName="NailGunTurret.glb" />
+    <EmbeddedResource Include="..\..\assets\UI_Item_Icon_NailGunTurret.png" LogicalName="UI_Item_Icon_NailGunTurret.png" />
+    <EmbeddedResource Include="..\..\assets\TeslaCoil.glb" LogicalName="TeslaCoil.glb" />
+    <EmbeddedResource Include="..\..\assets\UI_Item_Icon_TeslaCoil.png" LogicalName="UI_Item_Icon_TeslaCoil.png" />
+  </ItemGroup>
+
+  <!-- What the Mod Manager's Mods screen shows about this mod. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="ModManager.Name" Value="Defenses Expanded&#10;防御扩展" />
+    <AssemblyMetadata Include="ModManager.Description" Value="Adds five new defenses to build against the siege: Concrete Barrier, Barbed Wire, Spike Plate, Nail Gun Turret and Tesla Coil.&#10;新增五种可以建造来抵御围攻的防御设施：混凝土路障、铁丝网、钉板、射钉炮塔和特斯拉线圈。" />
+    <AssemblyMetadata Include="ModManager.Author" Value="AnExiledDev" />
+    <AssemblyMetadata Include="ModManager.Category" Value="Gameplay" />
+    <AssemblyMetadata Include="ModManager.GameVersion" Value="1.1.20151" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,78 @@
+using System;
+using DefensesExpanded.Core;
+using GameCore.HotUpdate.Battle.Show;
+using HarmonyLib;
+
+namespace DefensesExpanded.Adapters;
+
+/// <summary>
+/// The game picks a defense's strike effect (the spikes, the electric arc, the chainsaw sparks) by the defense's own
+/// furniture id, so ours would show none. While the effect is chosen, a defense of ours reads as the stock defense it
+/// copies, and gets its id back straight after. The target was checked in GameAssembly.dll: no relative jump or call in
+/// its first 14 bytes.
+/// </summary>
+internal static class FxPatches
+{
+    private static Action<string> _log = _ => { };
+    private static bool _failed;
+
+    public static void Apply(Harmony harmony, Action<string> log)
+    {
+        _log = log;
+
+        try
+        {
+            var target = AccessTools.Method(typeof(TowerDefenseShowManager), "PlayStrikeFx");
+
+            if (target == null)
+            {
+                _log("cannot find TowerDefenseShowManager.PlayStrikeFx, so the defenses' attacks show no effect");
+
+                return;
+            }
+
+            harmony.Patch(target, prefix: new HarmonyMethod(typeof(FxPatches), nameof(AsStock)), postfix: new HarmonyMethod(typeof(FxPatches), nameof(AsOurs)));
+        }
+        catch (Exception ex)
+        {
+            _log($"cannot hook TowerDefenseShowManager.PlayStrikeFx, so the defenses' attacks show no effect: {ex.Message}");
+        }
+    }
+
+    private static void AsStock(AgentModel __0, out int __state)
+    {
+        __state = 0;
+
+        try
+        {
+            if (__0 == null || DefenseRows.ByFurniture(__0.configId) is not { } kind) return;
+
+            __state = __0.configId;
+            __0.configId = kind.Stock.Furniture;
+        }
+        catch (Exception ex)
+        {
+            Fail(ex);
+        }
+    }
+
+    private static void AsOurs(AgentModel __0, int __state)
+    {
+        try
+        {
+            if (__state != 0 && __0 != null) __0.configId = __state;
+        }
+        catch (Exception ex)
+        {
+            Fail(ex);
+        }
+    }
+
+    private static void Fail(Exception ex)
+    {
+        if (_failed) return;
+
+        _failed = true;
+        _log($"the defenses' strike effect step failed (reported once): {ex}");
+    }
+}
