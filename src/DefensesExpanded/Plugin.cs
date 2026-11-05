@@ -5,28 +5,27 @@ using BepInEx.Configuration;
 using BepInEx.Unity.IL2CPP;
 using DefensesExpanded.Adapters;
 using DefensesExpanded.Core;
+using ExiledToolkit;
 using HarmonyLib;
 
 namespace DefensesExpanded;
 
 [BepInPlugin(Guid, "Defenses Expanded", Version)]
-[BepInDependency(OptionalLive.ToolkitGuid, BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("com.dev.survivallog.exiledtoolkit", ">=0.19.0")]
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensesexpanded";
-    private const string Version = "0.1.2";
+    private const string Version = "0.1.3";
 
     public override void Load()
     {
-        if (!OptionalLive.IsToolkitInstalled) Log.LogInfo(OptionalLive.MissingNote);
-
         var uninstallPrep = Config.Bind("Uninstall", "UninstallPrep", false,
             "Turn this on before you remove Defenses Expanded. Once a save is loaded, every Concrete Barrier, Barbed Wire, Spike Plate, Nail Gun Turret or Tesla Coil Package becomes the package of the game's defense it is based on (Sandbags, Spike Barrier, Mechanical Chainsaw or Electric Trap), in your bags, in storage and on the floor, in every place the save holds. Placed and packed defenses are always saved as those game defenses, so they need nothing. Then save the game, quit, and remove DefensesExpanded.dll. LogOutput.log lists what was changed. Turning this off again does not turn the packages back.\n" +
             "移除防御扩展模组之前请先打开此项。读取存档后，背包、储物和地上的每个混凝土路障、铁丝网、钉板、射钉炮塔或特斯拉线圈包裹都会变成它所仿照的原版防御设施（沙包、尖刺障碍、机械电锯或电网）的包裹，存档里的每个地点都一样。已安装和已打包的防御设施本来就按这些原版设施保存，不受影响。然后存档、退出游戏，再删除 DefensesExpanded.dll。改了哪些东西写在 LogOutput.log 里。再关掉此项，包裹也不会变回来。");
 
         foreach (var kind in DefenseRows.All) BindSettings(kind);
 
-        OptionalLive.Watch(uninstallPrep, isOn =>
+        LiveSettings.Watch(uninstallPrep, isOn =>
         {
             UninstallPrep.Set(isOn);
             if (isOn) Log.LogInfo("Uninstall prep is on: load a save to turn the defense packages into the game's own defense packages");
@@ -149,7 +148,7 @@ public sealed class Plugin : BasePlugin
                 new AcceptableValueRange<float>(0f, 0.95f));
         }
 
-        OptionalLive.Watch(() => CurrentSettings.Set(kind, new DefenseSettings
+        LiveSettings.Watch(() => CurrentSettings.Set(kind, new DefenseSettings
         {
             Health = health.Value,
             Materials = materials.Value,

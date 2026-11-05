@@ -26,7 +26,7 @@ This is an early test build.
 
 ## Settings
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensesexpanded.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. See [CONFIG.md](CONFIG.md) for every setting. Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
+Settings live in `BepInEx\config\com.dev.survivallog.defensesexpanded.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. See [CONFIG.md](CONFIG.md) for every setting.
 
 ## Save safety
 
@@ -44,9 +44,9 @@ Then delete `DefensesExpanded.dll` from the `BepInEx\plugins` folder. For a clea
 
 ## Requirements
 
-- Survival Log 1.1.20151.
+- Survival Log 1.1.20719.
 - BepInEx for Survival Log.
-- Optional: [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.4.0 or newer. With it, settings changed on the Mod Manager's Mods screen take effect without restarting the game. Without it, they take effect at the next game start.
+- [Exiled's Toolkit](https://github.com/AnExiledDev/SurvivalLog-ExiledToolkit) 0.19.0 or newer. Defenses Expanded does not load without it. It lets settings changed on the Mod Manager's Mods screen take effect without restarting the game.
 
 ## Install
 

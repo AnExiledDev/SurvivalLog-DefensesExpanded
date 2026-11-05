@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using DefensesExpanded.Core;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using Il2CppInts = Il2CppSystem.Collections.Generic.List<int>;

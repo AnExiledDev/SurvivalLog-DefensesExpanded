@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Now uses Exiled's Toolkit for its shared parts, so it needs Exiled's Toolkit 0.19.0 or newer.
+- Made for Survival Log 1.1.20719.
+
 ## 0.1.2
 
 - Changing a Nail Gun Turret's or Tesla Coil's `PowerCost` between `0` and more now applies right away: the defense joins or leaves the power grid without a reload.

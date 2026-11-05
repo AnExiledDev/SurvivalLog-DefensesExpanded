@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
+using ExiledToolkit.Game;
 using HarmonyLib;
 using DefensesExpanded.Core;
 using Il2CppAgentSaves = Il2CppSystem.Collections.Generic.List<GameCore.HotUpdate.AgentSave>;

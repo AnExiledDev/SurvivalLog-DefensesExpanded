@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DefensesExpanded.Core;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using Il2CppItemSaves = Il2CppSystem.Collections.Generic.List<GameCore.HotUpdate.ItemSave>;

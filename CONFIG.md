@@ -1,6 +1,6 @@
 # Defenses Expanded settings
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensesexpanded.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, where they take effect at once (on the defenses already standing too), or edit the file while the game is closed. Delete the file to get the defaults back. Without Exiled's Toolkit installed, changes made on the Mods screen take effect at the next game start instead.
+Settings live in `BepInEx\config\com.dev.survivallog.defensesexpanded.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, where they take effect at once (on the defenses already standing too), or edit the file while the game is closed. Delete the file to get the defaults back.
 
 Each defense has its own section: `[ConcreteBarrier]`, `[BarbedWire]`, `[SpikePlate]`, `[NailGunTurret]` and `[TeslaCoil]`. A section holds only the settings that defense uses.
 
