@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4
+
+- With the Mod Manager, each defense's `Materials` shows as item cards with a picker, and the defense's package beside them with its pieces, weight and value.
+- Made for Survival Log 1.1.20719.
+
 ## 0.1.3
 
 - Now uses Exiled's Toolkit for its shared parts, so it needs Exiled's Toolkit 0.19.0 or newer.

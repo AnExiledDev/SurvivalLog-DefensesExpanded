@@ -15,7 +15,7 @@ namespace DefensesExpanded;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensesexpanded";
-    private const string Version = "0.1.3";
+    private const string Version = "0.1.4";
 
     public override void Load()
     {
@@ -68,9 +68,9 @@ public sealed class Plugin : BasePlugin
         var d = kind.Defaults;
         var entries = new List<ConfigEntryBase>();
 
-        ConfigEntry<T> Bind<T>(string key, T value, string en, string chinese, AcceptableValueBase? range = null)
+        ConfigEntry<T> Bind<T>(string key, T value, string en, string chinese, AcceptableValueBase? range = null, params object[] tags)
         {
-            var entry = Config.Bind(section, key, value, new ConfigDescription(en + "\n" + chinese, range));
+            var entry = Config.Bind(section, key, value, new ConfigDescription(en + "\n" + chinese, range, tags));
 
             entries.Add(entry);
 
@@ -83,7 +83,8 @@ public sealed class Plugin : BasePlugin
             new AcceptableValueRange<int>(1, 20000));
         var materials = Bind("Materials", d.Materials,
             $"What crafting a {name} Package takes, written as item id:count pairs split by commas. 20004 is Scrap Metal, 20104 Wire, 20210 Electronic Components, 20361 Iron Rod and 20362 Iron Parts. Up to {MaterialList.MostKinds} different items. A list the game cannot use (an unknown item, or the same materials as another recipe) falls back to the default, and LogOutput.log says why.",
-            $"制作{zh}包裹所需的材料，写成「物品id:数量」，用逗号隔开。20004 是铁皮，20104 是铁丝，20210 是电器元件，20361 是铁棍，20362 是铁制零件。最多 {MaterialList.MostKinds} 种物品。游戏用不了的清单（物品不存在，或和别的配方材料相同）会改用默认值，原因写在 LogOutput.log 里。");
+            $"制作{zh}包裹所需的材料，写成「物品id:数量」，用逗号隔开。20004 是铁皮，20104 是铁丝，20210 是电器元件，20361 是铁棍，20362 是铁制零件。最多 {MaterialList.MostKinds} 种物品。游戏用不了的清单（物品不存在，或和别的配方材料相同）会改用默认值，原因写在 LogOutput.log 里。",
+            null, "ModManager.Control=ItemCounts", $"ModManager.MaxKinds={MaterialList.MostKinds}", $"ModManager.MaxCount={MaterialList.MostOfOne}", $"ModManager.Makes={kind.Ids.Item}");
         var repairPerPart = Bind("RepairPerPart", d.RepairPerPart,
             $"How much health one Repair Parts puts back on a {name}. The game's Sandbags get 200 and its Spike Barrier 50.",
             $"每个维修零件能为{zh}恢复多少耐久。原版沙包是 200，尖刺障碍是 50。",
