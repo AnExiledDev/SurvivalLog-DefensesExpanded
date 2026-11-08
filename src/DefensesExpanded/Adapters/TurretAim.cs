@@ -60,12 +60,14 @@ internal static class TurretAim
             for (var h = 0; h < aimer.Heads.Length; h++)
             {
                 var head = aimer.Heads[h];
+                var body = aimer.Bodies[h];
+                var parent = aimer.Parents[h];
 
-                if (head == null || head.WasCollected || !head.gameObject.activeInHierarchy) continue;
+                if (head == null || head.WasCollected || body == null || body.WasCollected || !body.activeInHierarchy) continue;
 
-                if (aimer.Target != null)
+                if (aimer.Target != null && parent != null && !parent.WasCollected)
                 {
-                    var toward = head.parent.InverseTransformPoint(aimer.Target.position) - aimer.Rest[h];
+                    var toward = parent.InverseTransformPoint(aimer.Target.position) - aimer.Rest[h];
 
                     if (toward.x * toward.x + toward.z * toward.z > 0.0001f)
                         aimer.Yaw[h] = Aim.Turn(aimer.Yaw[h], Aim.Heading(toward.x, toward.z), TurnDegreesPerSecond * deltaSeconds);
@@ -101,11 +103,16 @@ internal static class TurretAim
         {
             Turret = turret;
             Heads = heads;
+            Bodies = new GameObject[heads.Length];
+            Parents = new Transform[heads.Length];
             Rest = new Vector3[heads.Length];
             Yaw = new float[heads.Length];
 
+            // Held once here, so the per-frame update makes no new game object wrappers.
             for (var h = 0; h < heads.Length; h++)
             {
+                Bodies[h] = heads[h].gameObject;
+                Parents[h] = heads[h].parent;
                 Rest[h] = heads[h].localPosition;
                 Yaw[h] = heads[h].localEulerAngles.y;
             }
@@ -113,6 +120,8 @@ internal static class TurretAim
 
         public GameObject Turret { get; }
         public Transform[] Heads { get; }
+        public GameObject[] Bodies { get; }
+        public Transform[] Parents { get; }
         public Vector3[] Rest { get; }
         public float[] Yaw { get; }
         public Transform? Target { get; set; }

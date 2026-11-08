@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+- The Nail Gun Turret's aiming does less work each frame while turrets are firing.
+- If the defenses could not be added to the game's tables, the mod now tries again instead of leaving them missing until a setting changes.
+- The `Materials` description now says each item can count up to 99.
+- Made for Survival Log 1.1.20719.
+
 ## 0.2.0
 
 - Each defense now unlocks at a Defense skill level: the Concrete Barrier, Barbed Wire and Spike Plate at level 2, the Nail Gun Turret at level 3 and the Tesla Coil at level 5. A new `UnlockLevel` setting for each defense changes it.

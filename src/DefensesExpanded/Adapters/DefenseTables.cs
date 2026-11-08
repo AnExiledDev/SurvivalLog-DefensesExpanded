@@ -22,6 +22,7 @@ internal sealed class DefenseTables
 {
     private const float CheckSeconds = 1f;
     private const float RevealSeconds = 5f;
+    private const float RetrySeconds = 30f;
 
     // The six row tables, the game settings, the two languages and the defense skill levels.
     private const int Watched = 10;
@@ -71,10 +72,23 @@ internal sealed class DefenseTables
         var previous = _appliedSettings;
         var isChange = previous != null && !ReferenceEquals(settings, previous);
 
+        List<DefenseKind> written;
+
+        try
+        {
+            written = Write(config, tables, english, chinese, settings);
+        }
+        catch (Exception ex)
+        {
+            // Not marked as applied, so the write is tried again; waiting a while keeps the log from filling.
+            _nextCheckAt = now + RetrySeconds;
+            _log($"the defense rows could not be written, trying again in {RetrySeconds:0} s: {ex}");
+
+            return;
+        }
+
         _seen.CopyTo(_applied, 0);
         _appliedSettings = settings;
-
-        var written = Write(config, tables, english, chinese, settings);
 
         // A defense placed in this run took its numbers when it was built; a change brings it up to the new ones.
         if (isChange && written.Count > 0) Step("defenses already placed", () => RefreshPlaced(config, written, previous!, settings));
