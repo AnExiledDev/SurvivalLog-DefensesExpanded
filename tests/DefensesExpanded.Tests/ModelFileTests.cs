@@ -11,7 +11,7 @@ public class ModelFileTests
 
     private static readonly string[] States = { "State01", "State02", "State03", "StateBroken" };
 
-    private static readonly IReadOnlyDictionary<string, Vector3> Movers = States.ToDictionary(name => name, _ => Vector3.UnitY);
+    private static readonly IReadOnlyDictionary<string, Vector3> Movers = States.Concat(States.Select(name => name + "_Head")).ToDictionary(name => name, _ => Vector3.UnitY);
 
     private static byte[] Asset(string name) => File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "assets", name));
 
@@ -47,6 +47,26 @@ public class ModelFileTests
 
             Assert.InRange(max.X - min.X, width * 0.5f, width * 1.5f);
         }
+    }
+
+    // The turret's head turns toward the zombie it shoots, so each standing state needs it as its own part riding on
+    // that state, turning about a pivot on top of the stand, and the broken one has none.
+    [Fact]
+    public void TheTurretHeadRidesOnEachStandingState()
+    {
+        var model = Load("Turret");
+
+        foreach (var state in States.Take(3))
+        {
+            var head = model.Parts.Single(part => part.Name == state + "_Head");
+            var stand = model.Parts.Single(part => part.Name == state);
+
+            Assert.Equal(state, head.Parent);
+            Assert.NotEmpty(head.Meshes);
+            Assert.InRange(head.Pivot.Y - stand.Pivot.Y, 0.5f, 1f);
+        }
+
+        Assert.DoesNotContain(model.Parts, part => part.Name == "StateBroken_Head");
     }
 
     [Theory]

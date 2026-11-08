@@ -230,4 +230,27 @@ public class DefenseRowsTests
     [InlineData(0.65f, "0.65")]
     [InlineData(2f, "2")]
     public void NumbersAreWrittenWithoutTrailingZeros(float value, string text) => Assert.Equal(text, DefenseRows.Number(value));
+
+    // The operator's levels: the three walls and traps at 2, the turret at 3, the coil at 5.
+    [Fact]
+    public void EachDefenseUnlocksAtItsSkillLevel()
+    {
+        var levels = DefenseRows.All.ToDictionary(kind => kind.Key, kind => kind.Defaults.UnlockLevel);
+
+        Assert.Equal(new Dictionary<string, int> { ["Barrier"] = 2, ["Wire"] = 2, ["Spikes"] = 2, ["Turret"] = 3, ["Tesla"] = 5 }, levels);
+        Assert.All(levels.Values, level => Assert.InRange(level, 0, DefenseRows.TopLevel));
+    }
+
+    // A defense that takes longer to reach must hit each zombie harder; how many it strikes at once is on top of that.
+    [Fact]
+    public void ALaterDefenseDoesMoreDamageASecond()
+    {
+        static float PerSecond(DefenseKind kind) => kind.Defaults.Damage / kind.Defaults.AttackInterval;
+
+        var attackers = DefenseRows.All.Where(kind => kind.Attacks && kind.Defaults.Damage > 1).OrderBy(kind => kind.Defaults.UnlockLevel).ToList();
+
+        for (var i = 1; i < attackers.Count; i++)
+            if (attackers[i].Defaults.UnlockLevel > attackers[i - 1].Defaults.UnlockLevel)
+                Assert.True(PerSecond(attackers[i]) > PerSecond(attackers[i - 1]), $"{attackers[i].Name} should out-hit {attackers[i - 1].Name}");
+    }
 }

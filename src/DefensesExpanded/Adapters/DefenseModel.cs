@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DefensesExpanded.Core;
+using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle;
+using GameCore.HotUpdate.Battle.Logic;
 using GameCore.HotUpdate.Battle.Show;
 using GameCore.Scripts;
 using HarmonyLib;
@@ -21,7 +23,9 @@ namespace DefensesExpanded.Adapters;
 /// collider, the nav obstacle, the animator, the state switcher and the effects. The stock meshes under the four state
 /// groups (intact, two damaged, broken) are swapped for the defense's own, built from the model file inside the DLL,
 /// which has a group for each state; the game shows one at a time as the defense wears down. If a model cannot be
-/// built, the game gets the stock prefab, so the defense still works, looking like the stock one.
+/// built, the game gets the stock prefab, so the defense still works, looking like the stock one. A model with a head
+/// (the turret's) gets it as its own child in each standing state, which <see cref="TurretAim"/> turns. The models are
+/// built a few seconds into a run, one a second, so placing the first of a kind does not stall the game.
 /// </summary>
 internal static class DefenseModel
 {
@@ -39,9 +43,16 @@ internal static class DefenseModel
     /// <summary>The chainsaw's spinning blade sparks and range ring, which a nail gun does not have.</summary>
     private static readonly string[] BladeOnly = { "Sparks_Rim", "RangeRing" };
 
-    private static readonly IReadOnlyDictionary<string, Numerics.Vector3> Movers = States.ToDictionary(name => name, _ => Numerics.Vector3.UnitY);
+    /// <summary>The end of a head's node name in the model file, and of its holder's name in the built model.</summary>
+    internal const string HeadSuffix = "_Head";
 
-    private static readonly Look[] Looks = DefenseRows.All.Select(kind => new Look(kind.Name, kind.ResName, kind.StockPrefab, kind.ModelFile)).ToArray();
+    private static readonly IReadOnlyDictionary<string, Numerics.Vector3> Movers = States.Concat(States.Select(name => name + HeadSuffix)).ToDictionary(name => name, _ => Numerics.Vector3.UnitY);
+
+    private static readonly Look[] Looks = DefenseRows.All.Select(kind => new Look(kind.Name, kind.ResName, kind.StockPrefab, kind.ModelFile, kind.ModelYaw)).ToArray();
+
+    private const float PrewarmAfterSeconds = 3f;
+    private const float PrewarmEverySeconds = 1f;
+    private static float _prewarmAt = -1f;
 
     private static Action<string> _log = _ => { };
     private static GameObject? _holder;
@@ -79,6 +90,48 @@ internal static class DefenseModel
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Builds one model that is not built yet, once a run has been going a few seconds, so the first placement of each
+    /// defense finds it ready. Returns at once when all are built.
+    /// </summary>
+    public static void Prewarm(float now)
+    {
+        if (_prewarmAt == float.MaxValue) return;
+
+        if (GameSingleton.Existing<BattleLogicWorld>() == null)
+        {
+            _prewarmAt = -1f;
+
+            return;
+        }
+
+        if (_prewarmAt < 0f) _prewarmAt = now + PrewarmAfterSeconds;
+
+        if (now < _prewarmAt) return;
+
+        _prewarmAt = now + PrewarmEverySeconds;
+
+        foreach (var look in Looks)
+        {
+            if (look.HasFailed || (look.Template != null && !look.Template.WasCollected)) continue;
+
+            try
+            {
+                Template(look);
+            }
+            catch (Exception ex)
+            {
+                if (!look.HasFailed) _log($"the {look.Name}'s model could not be built, so it has the stock look: {ex}");
+
+                look.HasFailed = true;
+            }
+
+            return;
+        }
+
+        _prewarmAt = float.MaxValue;
     }
 
     /// <summary>The game preloads every furniture prefab a level uses from its asset bundles, and ours are in none.</summary>
@@ -166,13 +219,15 @@ internal static class DefenseModel
 
         if (palette != null) Object.DestroyImmediate(palette);
 
-        var materials = model.Materials.Select(material => MakeMaterial(stockMaterial, material, model.Images)).ToArray();
+        var materials = MakeMaterials(stockMaterial, model);
         var scale = root.lossyScale;
+        var yaw = Quaternion.Euler(0f, look.Yaw, 0f);
 
         // The intact model stands with its foot on the floor; the other states share its lift, so they stand where it did.
-        var (min, max) = PartBounds(parts["State01"]);
-        var lift = -min.Y;
+        var (min, max) = Turned(StateBounds(model, "State01"), yaw);
+        var lift = -min.y;
         var made = new List<MeshRenderer>();
+        var heads = 0;
 
         foreach (var name in States)
         {
@@ -180,15 +235,26 @@ internal static class DefenseModel
             var holder = new GameObject(look.ResName + "_" + name) { layer = layer };
 
             holder.transform.SetParent(groups[name], false);
-            holder.transform.localRotation = Quaternion.identity;
+            holder.transform.localRotation = yaw;
             holder.transform.localScale = new UnityEngine.Vector3(1f / scale.x, 1f / scale.y, 1f / scale.z);
-            holder.transform.localPosition = Divide(new UnityEngine.Vector3(part.Pivot.X, part.Pivot.Y + lift, part.Pivot.Z), scale);
+            holder.transform.localPosition = Divide(yaw * new UnityEngine.Vector3(part.Pivot.X, part.Pivot.Y + lift, part.Pivot.Z), scale);
 
-            for (var i = 0; i < part.Meshes.Count; i++) made.Add(MakeMesh(holder.transform, $"{name}_{i}", part.Meshes[i], materials[part.Meshes[i].Material], layer));
+            AddMeshes(holder.transform, name, part, materials, layer, made);
+
+            // A part riding on this state (the turret's head) turns about its own pivot, so it gets its own holder there.
+            foreach (var rider in model.Parts.Where(rider => rider.Parent == name))
+            {
+                var turning = new GameObject(look.ResName + "_" + rider.Name) { layer = layer };
+
+                turning.transform.SetParent(holder.transform, false);
+                turning.transform.localPosition = Unity(rider.Pivot - part.Pivot);
+                AddMeshes(turning.transform, rider.Name, rider, materials, layer, made);
+                heads++;
+            }
         }
 
-        var bottom = root.TransformPoint(new UnityEngine.Vector3(min.X, 0f, min.Z));
-        var top = root.TransformPoint(new UnityEngine.Vector3(max.X, max.Y - min.Y, max.Z));
+        var bottom = root.TransformPoint(new UnityEngine.Vector3(min.x, 0f, min.z));
+        var top = root.TransformPoint(new UnityEngine.Vector3(max.x, max.y - min.y, max.z));
 
         foreach (var collider in copy.GetComponentsInChildren<BoxCollider>(true)) Fit(collider, bottom, top);
 
@@ -228,7 +294,7 @@ internal static class DefenseModel
             _log($"the stock prefab has no model animator; the {look.Name} may not light up when picked");
         }
 
-        _log($"{look.Name} model built: {model.TriangleCount} triangles, {made.Count} meshes, {model.Materials.Count} materials, {height:0.00} m tall");
+        _log($"{look.Name} model built: {model.TriangleCount} triangles, {made.Count} meshes, {materials.Distinct().Count()} materials, {heads} turning heads, {height:0.00} m tall, turned {look.Yaw:0} degrees");
     }
 
     /// <summary>Moves the stock arcs so their bolts leave from the top of the model, not from the middle of it.</summary>
@@ -244,21 +310,85 @@ internal static class DefenseModel
         arcs.position = new UnityEngine.Vector3(arcs.position.x, topY - BoltsBelowTop - boltsAbove, arcs.position.z);
     }
 
-    private static (Numerics.Vector3 Min, Numerics.Vector3 Max) PartBounds(ModelPart part)
+    /// <summary>The box around a state and the parts riding on it, in model space.</summary>
+    private static (Numerics.Vector3 Min, Numerics.Vector3 Max) StateBounds(Model model, string state)
     {
         var min = new Numerics.Vector3(float.MaxValue);
         var max = new Numerics.Vector3(float.MinValue);
 
-        foreach (var mesh in part.Meshes)
-            foreach (var position in mesh.Positions)
-            {
-                min = Numerics.Vector3.Min(min, position + part.Pivot);
-                max = Numerics.Vector3.Max(max, position + part.Pivot);
-            }
+        foreach (var part in model.Parts.Where(part => part.Name == state || part.Parent == state))
+            foreach (var mesh in part.Meshes)
+                foreach (var position in mesh.Positions)
+                {
+                    min = Numerics.Vector3.Min(min, position + part.Pivot);
+                    max = Numerics.Vector3.Max(max, position + part.Pivot);
+                }
 
-        if (min.X > max.X) throw new InvalidOperationException($"the model's {part.Name} has no meshes");
+        if (min.X > max.X) throw new InvalidOperationException($"the model's {state} has no meshes");
 
         return (min, max);
+    }
+
+    /// <summary>The box around a box turned about the upright axis.</summary>
+    private static (UnityEngine.Vector3 Min, UnityEngine.Vector3 Max) Turned((Numerics.Vector3 Min, Numerics.Vector3 Max) box, Quaternion yaw)
+    {
+        var min = new UnityEngine.Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        var max = new UnityEngine.Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+        foreach (var corner in Corners(Unity(box.Min), Unity(box.Max)))
+        {
+            var turned = yaw * corner;
+
+            min = UnityEngine.Vector3.Min(min, turned);
+            max = UnityEngine.Vector3.Max(max, turned);
+        }
+
+        return (min, max);
+    }
+
+    private static void AddMeshes(Transform holder, string name, ModelPart part, Material[] materials, int layer, List<MeshRenderer> made)
+    {
+        for (var i = 0; i < part.Meshes.Count; i++) made.Add(MakeMesh(holder, $"{name}_{i}", part.Meshes[i], materials[part.Meshes[i].Material], layer));
+    }
+
+    /// <summary>
+    /// One Unity material for each material in the file, where materials that look the same (the damaged states and
+    /// the head share most of theirs) are one material, and each picture is decoded once.
+    /// </summary>
+    private static Material[] MakeMaterials(Material stock, Model model)
+    {
+        var textures = new Dictionary<int, Texture2D>();
+        var made = new Dictionary<ModelMaterial, Material>();
+        var materials = new Material[model.Materials.Count];
+
+        for (var m = 0; m < materials.Length; m++)
+        {
+            var source = model.Materials[m];
+            var look = source with { Name = "" };
+
+            if (!made.TryGetValue(look, out var material))
+            {
+                Texture texture = Texture2D.whiteTexture;
+
+                if (source.Image is int image)
+                {
+                    if (!textures.TryGetValue(image, out var decoded))
+                    {
+                        decoded = MakeTexture(source.Name, Png.Decode(model.Images[image]));
+                        textures[image] = decoded;
+                    }
+
+                    texture = decoded;
+                }
+
+                material = MakeMaterial(stock, source, texture);
+                made[look] = material;
+            }
+
+            materials[m] = material;
+        }
+
+        return materials;
     }
 
     private static MeshRenderer MakeMesh(Transform parent, string name, ModelMesh source, Material material, int layer)
@@ -287,7 +417,7 @@ internal static class DefenseModel
         return renderer;
     }
 
-    private static Material MakeMaterial(Material stock, ModelMaterial source, IReadOnlyList<byte[]> images)
+    private static Material MakeMaterial(Material stock, ModelMaterial source, Texture texture)
     {
         var material = new Material(stock) { name = "DefensesExpanded_" + source.Name };
 
@@ -295,8 +425,6 @@ internal static class DefenseModel
             if (material.HasProperty(map)) material.SetTexture(map, null);
 
         foreach (var keyword in new[] { "_NORMALMAP", "_METALLICSPECGLOSSMAP", "_OCCLUSIONMAP", "_EMISSION", "_DETAIL_MULX2", "_SPECGLOSSMAP" }) material.DisableKeyword(keyword);
-
-        Texture texture = source.Image is int image ? MakeTexture(source.Name, Png.Decode(images[image])) : Texture2D.whiteTexture;
 
         foreach (var map in new[] { "_BaseMap", "_MainTex" })
         {
@@ -341,12 +469,13 @@ internal static class DefenseModel
             wrapMode = TextureWrapMode.Repeat,
             filterMode = FilterMode.Trilinear,
         };
-        var pixels = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<Color32>(picture.Width * picture.Height);
+        var colours = new Color32[picture.Width * picture.Height];
 
-        for (var p = 0; p < pixels.Length; p++)
-            pixels[p] = new Color32(picture.Rgba[p * 4], picture.Rgba[p * 4 + 1], picture.Rgba[p * 4 + 2], picture.Rgba[p * 4 + 3]);
+        for (var p = 0; p < colours.Length; p++)
+            colours[p] = new Color32(picture.Rgba[p * 4], picture.Rgba[p * 4 + 1], picture.Rgba[p * 4 + 2], picture.Rgba[p * 4 + 3]);
 
-        texture.SetPixels32(pixels);
+        // Built as a managed array and copied across in one go: setting each pixel across the bridge is slow.
+        texture.SetPixels32(new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<Color32>(colours));
         texture.Apply(true, true);
 
         return texture;
@@ -380,9 +509,10 @@ internal static class DefenseModel
 
     private sealed class Look
     {
-        public Look(string name, string resName, string stockPrefab, string modelFile)
+        public Look(string name, string resName, string stockPrefab, string modelFile, float yaw)
         {
             Name = name;
+            Yaw = yaw;
             ResName = resName;
             ModelFile = modelFile;
             Path = Folder + resName;
@@ -390,6 +520,9 @@ internal static class DefenseModel
         }
 
         public string Name { get; }
+
+        /// <summary>How far the model turns about its upright axis, in degrees.</summary>
+        public float Yaw { get; }
 
         public string ResName { get; }
 

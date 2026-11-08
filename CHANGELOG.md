@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0
+
+- Each defense now unlocks at a Defense skill level: the Concrete Barrier, Barbed Wire and Spike Plate at level 2, the Nail Gun Turret at level 3 and the Tesla Coil at level 5. A new `UnlockLevel` setting for each defense changes it.
+- The recipes are cheaper for the early defenses and dearer for the late ones, and the damage now rises with the level each one unlocks at. See Settings for the new numbers.
+- The Nail Gun Turret turns its head to face the zombie it is shooting and kicks back on each shot.
+- The Nail Gun Turret and Tesla Coil now face the right way.
+- Placing a defense no longer freezes the game for a moment: each model is built a few seconds into a run instead of on its first placement.
+- Two new Cheat Menu test buttons: give one of each defense, and start a large test wave.
+- Made for Survival Log 1.1.20719.
+
 ## 0.1.4
 
 - With the Mod Manager, each defense's `Materials` shows as item cards with a picker, and the defense's package beside them with its pieces, weight and value.

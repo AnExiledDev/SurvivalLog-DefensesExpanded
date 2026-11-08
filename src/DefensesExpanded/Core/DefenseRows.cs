@@ -54,6 +54,12 @@ public static class DefenseRows
     public static readonly RowIds ElectricFence = new(Item: 26003, Furniture: 36003, Recipe: 402, Action: 100026003, Effect: 100026003);
     public static readonly RowIds Chainsaw = new(Item: 26004, Furniture: 36004, Recipe: 403, Action: 100026004, Effect: 100026004);
 
+    /// <summary>The stock defense recipes: a player shown any of them is shown ours, and the skill level locks them.</summary>
+    public static readonly IReadOnlyList<int> StockRecipes = new[] { Sandbags.Recipe, SpikeBarrier.Recipe, ElectricFence.Recipe, Chainsaw.Recipe };
+
+    /// <summary>The defense skill's highest level (1.1.20719).</summary>
+    public const int TopLevel = 5;
+
     /// <summary>The settings the defenses' entries go in, and which field of an entry is the defense id.</summary>
     public static readonly IReadOnlyDictionary<string, int> Globals = new Dictionary<string, int>
     {
@@ -81,11 +87,10 @@ public static class DefenseRows
         StockPrefab = "P_Tripo01",
         ModelFile = "ConcreteBarrier.glb",
         IconFile = "UI_Item_Icon_ConcreteBarrier.png",
-        RevealedWith = ElectricFence.Recipe,
         SaveMarker = "DefensesExpanded.Defense.Barrier:",
         AttackPriority = 1,
         // Two and a half times the sandbags' 600, and its repairs go further for it.
-        Defaults = new DefenseSettings { Health = 1500, Materials = "20004:3, 20362:2", RepairPerPart = 300, RepairCostRatio = 0.5f, SiegePoints = 2 },
+        Defaults = new DefenseSettings { Health = 1500, Materials = "20004:4, 20361:1", RepairPerPart = 300, RepairCostRatio = 0.5f, SiegePoints = 2, UnlockLevel = 2 },
         Texts = Describe("Barrier", "Concrete Barrier", "混凝土路障",
             "A heavy barrier of cast concrete. It blocks zombies far longer than sandbags.",
             "浇筑混凝土制成的厚重路障，比沙包更能长久挡住丧尸。"),
@@ -101,15 +106,14 @@ public static class DefenseRows
         StockPrefab = "P_Tripo02",
         ModelFile = "BarbedWire.glb",
         IconFile = "UI_Item_Icon_BarbedWire.png",
-        RevealedWith = SpikeBarrier.Recipe,
         SaveMarker = "DefensesExpanded.Defense.Wire:",
         WalkThrough = true,
         Attacks = true,
         Slows = true,
         Defaults = new DefenseSettings
         {
-            Health = 250, Materials = "20004:2, 20104:3", RepairPerPart = 50, RepairCostRatio = 0.65f, SiegePoints = 3,
-            Damage = 1, AttackInterval = 2f, AttackRange = 1.2f, MaxTargets = 6, SlowPercent = 60, SlowSeconds = 6f,
+            Health = 250, Materials = "20004:3, 20104:2", RepairPerPart = 50, RepairCostRatio = 0.65f, SiegePoints = 3, UnlockLevel = 2,
+            Damage = 1, AttackInterval = 2f, AttackRange = 1.2f, MaxTargets = 6, SlowPercent = 40, SlowSeconds = 4f,
         },
         Texts = Describe("Wire", "Barbed Wire", "铁丝网",
             "Coils of barbed wire laid across the way. Zombies can push through it, but it slows them down and cuts them as they go.",
@@ -126,14 +130,13 @@ public static class DefenseRows
         StockPrefab = "P_Tripo02",
         ModelFile = "SpikePlate.glb",
         IconFile = "UI_Item_Icon_SpikePlate.png",
-        RevealedWith = SpikeBarrier.Recipe,
         SaveMarker = "DefensesExpanded.Defense.Spikes:",
         WalkThrough = true,
         Attacks = true,
         Defaults = new DefenseSettings
         {
-            Health = 300, Materials = "20004:2, 20361:2", RepairPerPart = 60, RepairCostRatio = 0.65f, SiegePoints = 3,
-            Damage = 4, AttackInterval = 1.5f, AttackRange = 0.8f, MaxTargets = 6,
+            Health = 300, Materials = "20004:2, 20361:1", RepairPerPart = 60, RepairCostRatio = 0.65f, SiegePoints = 3, UnlockLevel = 2,
+            Damage = 3, AttackInterval = 2f, AttackRange = 0.8f, MaxTargets = 6,
         },
         Texts = Describe("Spikes", "Spike Plate", "钉板",
             "A plank studded with spikes, laid flat on the ground. Zombies walk over it and are stabbed with every step.",
@@ -149,16 +152,16 @@ public static class DefenseRows
         ResName = "Mod_Defense_Turret",
         StockPrefab = "P_Tripo04",
         ModelFile = "NailGunTurret.glb",
+        ModelYaw = 180f,
         IconFile = "UI_Item_Icon_NailGunTurret.png",
-        RevealedWith = Chainsaw.Recipe,
         SaveMarker = "DefensesExpanded.Defense.Turret:",
         AttackPriority = 1,
         Attacks = true,
         Powered = true,
         Defaults = new DefenseSettings
         {
-            Health = 250, Materials = "20210:2, 20362:2, 20361:1", RepairPerPart = 40, RepairCostRatio = 0.8f, SiegePoints = 6,
-            Damage = 10, AttackInterval = 1.2f, AttackRange = 3.5f, MaxTargets = 1, PowerCost = 4, PowerPerHit = 1f, ShutsDownBelow = 0.5f,
+            Health = 250, Materials = "20210:1, 20361:1, 20004:3", RepairPerPart = 40, RepairCostRatio = 0.8f, SiegePoints = 6, UnlockLevel = 3,
+            Damage = 8, AttackInterval = 1.5f, AttackRange = 4f, MaxTargets = 1, PowerCost = 4, PowerPerHit = 1f, ShutsDownBelow = 0.5f,
         },
         Texts = Describe("Turret", "Nail Gun Turret", "射钉炮塔",
             "A powered nail gun on a turning mount. It fires at zombies from a distance, one at a time.",
@@ -174,8 +177,8 @@ public static class DefenseRows
         ResName = "Mod_Defense_Tesla",
         StockPrefab = "P_Tripo03",
         ModelFile = "TeslaCoil.glb",
+        ModelYaw = 180f,
         IconFile = "UI_Item_Icon_TeslaCoil.png",
-        RevealedWith = Chainsaw.Recipe,
         SaveMarker = "DefensesExpanded.Defense.Tesla:",
         AttackPriority = 1,
         Attacks = true,
@@ -183,8 +186,8 @@ public static class DefenseRows
         Powered = true,
         Defaults = new DefenseSettings
         {
-            Health = 250, Materials = "20210:3, 20104:2, 20004:1", RepairPerPart = 40, RepairCostRatio = 0.65f, SiegePoints = 6,
-            Damage = 6, AttackInterval = 4f, AttackRange = 2.5f, MaxTargets = 8, SlowPercent = 20, SlowSeconds = 2f, PowerCost = 6, PowerPerHit = 2f,
+            Health = 250, Materials = "20210:2, 20104:3, 20004:2", RepairPerPart = 40, RepairCostRatio = 0.65f, SiegePoints = 6, UnlockLevel = 5,
+            Damage = 18, AttackInterval = 3f, AttackRange = 3f, MaxTargets = 8, SlowPercent = 20, SlowSeconds = 2f, PowerCost = 6, PowerPerHit = 2f,
         },
         Texts = Describe("Tesla", "Tesla Coil", "特斯拉线圈",
             "A powered coil that throws arcs of electricity into the zombies around it, shocking several at once and slowing them down.",

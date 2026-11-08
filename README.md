@@ -1,26 +1,26 @@
 # Defenses Expanded
 
-Adds five new defenses to build against the siege in Survival Log. Each has its own model and icon, and its recipe sits at the workbench next to the game's defense it is based on.
+Adds five new defenses to build against the siege in Survival Log. Each has its own model and icon, and unlocks at a Defense skill level.
 
 - **Concrete Barrier**: a heavy wall of cast concrete. It blocks zombies like Sandbags, with 1500 health against their 600, and each Repair Parts puts back 300.
-- **Barbed Wire**: zombies can walk through it, but it cuts every one in reach (up to 6) for 1 damage every 2 seconds and slows them by 60% for 6 seconds.
-- **Spike Plate**: laid flat on the ground. Zombies walk over it and take 4 damage every 1.5 seconds, up to 6 at once.
-- **Nail Gun Turret**: needs power (4). It fires at one zombie up to 3.5 m away for 10 damage every 1.2 seconds, and stops working below half health until it is repaired.
-- **Tesla Coil**: needs power (6). Every 4 seconds it shocks up to 8 zombies within 2.5 m for 6 damage and slows them by 20% for 2 seconds.
+- **Barbed Wire**: zombies can walk through it, but it cuts every one in reach (up to 6) for 1 damage every 2 seconds and slows them by 40% for 4 seconds.
+- **Spike Plate**: laid flat on the ground. Zombies walk over it and take 3 damage every 2 seconds, up to 6 at once.
+- **Nail Gun Turret**: needs power (4). It turns to face one zombie up to 4 m away and fires for 8 damage every 1.5 seconds, and stops working below half health until it is repaired.
+- **Tesla Coil**: needs power (6). Every 3 seconds it shocks up to 8 zombies within 3 m for 18 damage and slows them by 20% for 2 seconds.
 
 Zombies go for them the way they go for the game's own defenses, Repair Parts fix them, and they count toward the size of the next siege like the game's own.
 
 ## Getting them
 
-- The Concrete Barrier's recipe shows once you have the Electric Trap's. Barbed Wire and the Spike Plate come with the Spike Barrier's, and the Nail Gun Turret and Tesla Coil with the Mechanical Chainsaw's. Each is at the same workbench level as the game's defense it sits next to.
-- Concrete Barrier: 3 Scrap Metal and 2 Iron Parts.
-- Barbed Wire: 2 Scrap Metal and 3 Wire.
-- Spike Plate: 2 Scrap Metal and 2 Iron Rod.
-- Nail Gun Turret: 2 Electronic Components, 2 Iron Parts and 1 Iron Rod.
-- Tesla Coil: 3 Electronic Components, 2 Wire and 1 Scrap Metal.
-- **Test buttons**: with Cheat Menu installed, its Mod tests tab shows each defense's numbers, or shows all five recipes right away.
+- The recipes show at the workbench once you have any of the game's defense recipes, and each one unlocks at a Defense skill level: the Concrete Barrier, Barbed Wire and Spike Plate at level 2, the Nail Gun Turret at level 3 and the Tesla Coil at level 5. The game's Electric Trap needs level 3 and its Mechanical Chainsaw level 4.
+- Concrete Barrier: 4 Scrap Metal and 1 Iron Rod.
+- Barbed Wire: 3 Scrap Metal and 2 Wire.
+- Spike Plate: 2 Scrap Metal and 1 Iron Rod.
+- Nail Gun Turret: 1 Electronic Components, 1 Iron Rod and 3 Scrap Metal.
+- Tesla Coil: 2 Electronic Components, 3 Wire and 2 Scrap Metal.
+- **Test buttons**: with Cheat Menu installed, its Mod tests tab shows each defense's numbers, shows all five recipes right away, gives you one of each defense, or starts a large test wave.
 
-Every number above (health, materials, repairs, siege size, damage, timing, range, targets, slowing and power) is a setting (see Settings). Changes apply at once, to the defenses already standing too.
+Every number above (health, materials, unlock levels, repairs, siege size, damage, timing, range, targets, slowing and power) is a setting (see Settings). Changes apply at once, to the defenses already standing too.
 
 This is an early test build.
 

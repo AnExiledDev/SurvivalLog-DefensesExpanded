@@ -15,16 +15,16 @@ namespace DefensesExpanded.Adapters;
 /// Writes the defenses' rows and text into the game's tables once they are loaded, adds their entries to the game
 /// settings that list defenses by id, then rebuilds the game's lookups that were made from them. It writes again when
 /// the game loads a table afresh or a setting changes, over its own rows where they already are, and then brings the
-/// defenses already standing in a run up to the new settings. Every few seconds it also shows a defense's recipe to a
-/// player who was already shown the stock recipe it comes with.
+/// defenses already standing in a run up to the new settings, and puts each recipe at its defense skill level. Every few
+/// seconds it also shows the defenses' recipes to a player who was already shown any stock defense recipe.
 /// </summary>
 internal sealed class DefenseTables
 {
     private const float CheckSeconds = 1f;
     private const float RevealSeconds = 5f;
 
-    // The six row tables, the game settings, and the two languages.
-    private const int Watched = 9;
+    // The six row tables, the game settings, the two languages and the defense skill levels.
+    private const int Watched = 10;
 
     private readonly Action<string> _log;
     private readonly IntPtr[] _seen = new IntPtr[Watched];
@@ -139,6 +139,7 @@ internal sealed class DefenseTables
 
         // Every list is rewritten, so a defense that could not be added this time leaves no entries behind.
         Step("game settings", () => SetGlobals(tables.Globals!, written.SelectMany(done => done.Globals).ToList()));
+        Step("defense skill levels", () => SetUnlockLevels(tables.DefenseLevels, written.Select(done => (done.Kind, done.Settings)).ToList()));
 
         if (written.Count == 0) return new List<DefenseKind>();
 
@@ -264,17 +265,68 @@ internal sealed class DefenseTables
         return false;
     }
 
+    /// <summary>
+    /// Puts each defense's recipe in the defense skill level lists at the level its setting asks for, after taking out
+    /// every recipe of ours from every list. The lists are changed in place, since the game reads them on every check.
+    /// </summary>
+    private void SetUnlockLevels(Il2CppDictionary.Dictionary<int, Config_DefenseLv>? levels, IReadOnlyList<(DefenseKind Kind, DefenseSettings Settings)> written)
+    {
+        if (levels == null || levels.Count == 0)
+        {
+            _log("the game has no defense skill levels, so the defenses unlock with no level");
+
+            return;
+        }
+
+        var ours = DefenseRows.All.Select(kind => kind.Ids.Recipe).ToHashSet();
+        var unlockAt = written.ToDictionary(done => done.Kind.Ids.Recipe, done => done.Settings.UnlockLevel);
+
+        foreach (var pair in levels)
+        {
+            var row = pair.Value;
+
+            if (row == null) continue;
+
+            Rewrite(row.unlock_recipes, false);
+            Rewrite(row.unlock_recipes_P1, true);
+            Rewrite(row.unlock_recipes_P2, true);
+            Rewrite(row.unlock_recipes_P3, true);
+            Rewrite(row.unlock_recipes_P4, true);
+
+            void Rewrite(Il2CppInts? list, bool roleList)
+            {
+                if (list == null) return;
+
+                var now = UnlockLevels.Rebuild(ToArray(list), roleList, row.Lv, ours, unlockAt);
+
+                if (now.SequenceEqual(ToArray(list))) return;
+
+                list.Clear();
+
+                foreach (var id in now) list.Add(id);
+            }
+        }
+
+        foreach (var (kind, settings) in written)
+            if (settings.UnlockLevel > 0 && !levels.ContainsKey(settings.UnlockLevel)) _log($"the defense skill has no level {settings.UnlockLevel}, so the {kind.Name} needs no level");
+    }
+
     private void KeepReveals(Il2CppDictionary.Dictionary<int, Config_ProductionList> recipes, IReadOnlyList<DefenseKind> kinds)
     {
         _reveals.Clear();
 
+        var stock = DefenseRows.StockRecipes.Where(recipes.ContainsKey).Select(id => recipes[id]).ToList();
+
+        if (stock.Count == 0) return;
+
         foreach (var kind in kinds)
-            if (recipes.ContainsKey(kind.Ids.Recipe) && recipes.ContainsKey(kind.RevealedWith)) _reveals.Add(new Reveal(kind, recipes[kind.Ids.Recipe], recipes[kind.RevealedWith]));
+            if (recipes.ContainsKey(kind.Ids.Recipe)) _reveals.Add(new Reveal(kind, recipes[kind.Ids.Recipe], stock));
     }
 
     /// <summary>
-    /// Shows a defense's recipe to a player who has the stock one it comes with: a run that was past it before the mod
-    /// was added, or a run whose materials setting changed, since the game remembers a recipe by its materials.
+    /// Shows the defenses' recipes to a player who has any stock defense recipe: a run that was past it before the mod
+    /// was added, or a run whose materials setting changed, since the game remembers a recipe by its materials. The
+    /// defense skill level still locks each one until the player reaches it.
     /// </summary>
     private void ShowRecipes()
     {
@@ -288,13 +340,13 @@ internal sealed class DefenseTables
 
             foreach (var reveal in _reveals)
             {
-                if (tool.IsProductionRevealedByRecord(reveal.Ours) || !tool.IsProductionRevealedByRecord(reveal.ComesWith)) continue;
+                if (tool.IsProductionRevealedByRecord(reveal.Ours) || !AnyRevealed(tool, reveal.ComesWith)) continue;
 
                 var ids = new Il2CppInts();
 
                 ids.Add(reveal.Kind.Ids.Recipe);
                 tool.AddProductionRecords(ids);
-                _log($"{reveal.Kind.Name} recipe shown, since recipe {reveal.Kind.RevealedWith} already is");
+                _log($"{reveal.Kind.Name} recipe shown, since a stock defense recipe already is");
             }
         }
         catch (Exception ex)
@@ -302,6 +354,14 @@ internal sealed class DefenseTables
             _reveals.Clear();
             _log($"cannot show the defenses' recipes in a run already going, so they wait for the stock ones: {ex}");
         }
+    }
+
+    private static bool AnyRevealed(ToolTableManager tool, IReadOnlyList<Config_ProductionList> recipes)
+    {
+        for (var i = 0; i < recipes.Count; i++)
+            if (tool.IsProductionRevealedByRecord(recipes[i])) return true;
+
+        return false;
     }
 
     private void Step(string what, Action step)
@@ -364,7 +424,7 @@ internal sealed class DefenseTables
         return values;
     }
 
-    private sealed record Reveal(DefenseKind Kind, Config_ProductionList Ours, Config_ProductionList ComesWith);
+    private sealed record Reveal(DefenseKind Kind, Config_ProductionList Ours, IReadOnlyList<Config_ProductionList> ComesWith);
 
     /// <summary>The tables the mod writes, read from the game once a check.</summary>
     private sealed class Tables
@@ -378,6 +438,7 @@ internal sealed class DefenseTables
             Effects = config._Config_Effect_Dict;
             Towers = config._Config_TowerDevice_Dict;
             Globals = config._Config_GlobalSetting_Dict;
+            DefenseLevels = config._Config_DefenseLv_Dict;
         }
 
         public Il2CppDictionary.Dictionary<int, Config_Item>? Items { get; }
@@ -387,6 +448,7 @@ internal sealed class DefenseTables
         public Il2CppDictionary.Dictionary<int, Config_Effect>? Effects { get; }
         public Il2CppDictionary.Dictionary<int, Config_TowerDevice>? Towers { get; }
         public Il2CppDictionary.Dictionary<string, Config_GlobalSetting>? Globals { get; }
+        public Il2CppDictionary.Dictionary<int, Config_DefenseLv>? DefenseLevels { get; }
 
         /// <summary>Whether every table the defenses need is loaded.</summary>
         public bool HasRows => IsLoaded(Items) && IsLoaded(Furniture) && IsLoaded(Recipes) && IsLoaded(Actions) && IsLoaded(Effects) && IsLoaded(Towers) && Globals != null && Globals.Count > 0;
@@ -402,6 +464,7 @@ internal sealed class DefenseTables
             into[6] = Pointer(Globals);
             into[7] = english.Pointer;
             into[8] = chinese.Pointer;
+            into[9] = Pointer(DefenseLevels);
         }
 
         private static bool IsLoaded<T>(Il2CppDictionary.Dictionary<int, T>? table) => table != null && table.Count > 0;

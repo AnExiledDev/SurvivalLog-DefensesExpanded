@@ -24,6 +24,9 @@ public sealed record DefenseSettings
     /// <summary>How much the defense counts toward the size of the next siege.</summary>
     public int SiegePoints { get; init; }
 
+    /// <summary>The defense skill level its recipe needs, 0 for none.</summary>
+    public int UnlockLevel { get; init; }
+
     public int Damage { get; init; }
     public float AttackInterval { get; init; }
     public float AttackRange { get; init; }
@@ -67,8 +70,11 @@ public sealed record DefenseKind
 
     public string IconFile { get; init; } = "";
 
-    /// <summary>The stock recipe that reveals this one: anyone shown it is shown this too.</summary>
-    public int RevealedWith { get; init; }
+    /// <summary>
+    /// How far the model is turned about its upright axis, in degrees, so its front faces the way the stock prefab's
+    /// does.
+    /// </summary>
+    public float ModelYaw { get; init; }
 
     /// <summary>What the save's name field starts with while this defense is saved as its stock twin.</summary>
     public string SaveMarker { get; init; } = "";

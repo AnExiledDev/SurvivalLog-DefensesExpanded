@@ -15,7 +15,7 @@ namespace DefensesExpanded;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensesexpanded";
-    private const string Version = "0.1.4";
+    private const string Version = "0.2.0";
 
     public override void Load()
     {
@@ -51,6 +51,8 @@ public sealed class Plugin : BasePlugin
 
             tables.Tick(now);
             UninstallPrep.Tick(now);
+            DefenseModel.Prewarm(now);
+            TurretAim.Update(now, UnityEngine.Time.deltaTime);
         };
         AddComponent<DefenseTicker>();
         Log.LogInfo($"Defenses Expanded {Version} loaded");
@@ -97,6 +99,10 @@ public sealed class Plugin : BasePlugin
             $"How much each {name} adds to the size of the next siege: the more defenses you build, the more zombies come. The game counts its Sandbags as 1 and its Mechanical Chainsaw as 6.",
             $"每个{zh}让下一次围攻增加多少规模：防御设施越多，来的丧尸越多。原版沙包算 1，机械电锯算 6。",
             new AcceptableValueRange<int>(0, 50));
+        var unlockLevel = Bind("UnlockLevel", d.UnlockLevel,
+            $"The Defense skill level you need before you can craft a {name}. 0 needs no level. The game's Electric Trap needs level 3 and its Mechanical Chainsaw level 4.",
+            $"需要防御技能达到几级才能制作{zh}。0 表示不需要等级。原版电网需要 3 级，机械电锯需要 4 级。",
+            new AcceptableValueRange<int>(0, DefenseRows.TopLevel));
 
         ConfigEntry<int>? damage = null, maxTargets = null, slowPercent = null, powerCost = null;
         ConfigEntry<float>? interval = null, range = null, slowSeconds = null, powerPerHit = null, shutsDown = null;
@@ -156,6 +162,7 @@ public sealed class Plugin : BasePlugin
             RepairPerPart = repairPerPart.Value,
             RepairCostRatio = repairCost.Value,
             SiegePoints = siege.Value,
+            UnlockLevel = unlockLevel.Value,
             Damage = damage?.Value ?? 0,
             AttackInterval = interval?.Value ?? 0f,
             AttackRange = range?.Value ?? 0f,
