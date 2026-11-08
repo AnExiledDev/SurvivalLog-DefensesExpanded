@@ -48,7 +48,7 @@ Then delete `DefensesExpanded.dll` from the `BepInEx\plugins` folder. For a clea
 
 ## Install
 
-Extract the release zip into the game folder (the folder with `SurvivalLog.exe`), so `DefensesExpanded.dll` lands in `BepInEx\plugins`. Install BepInEx and Exiled's Toolkit first.
+Download `DefensesExpanded-x.y.z.zip` from the [latest release](https://github.com/AnExiledDev/SurvivalLog-DefensesExpanded/releases/latest) or from [Nexus Mods](https://www.nexusmods.com/survivallog/mods/139). Extract it into the game folder (the folder with `SurvivalLog.exe`), so `DefensesExpanded.dll` lands in `BepInEx\plugins`. Install BepInEx and Exiled's Toolkit first.
 
 ## Known issues
 
