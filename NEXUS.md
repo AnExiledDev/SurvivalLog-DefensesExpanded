@@ -1,5 +1,5 @@
 Name: Defenses Expanded
-Summary: Adds five defenses for the siege: a Concrete Barrier, Barbed Wire, a Spike Plate, a powered Nail Gun Turret and a Tesla Coil. Each has its own model and icon and unlocks at a Defense skill level. Health, damage, range, timing, slowing, power, repairs, siege size, unlock level and materials are settings, and one setting makes removal safe.
+Summary: Adds five new defenses to build: a Concrete Barrier, Barbed Wire, a Spike Plate, a powered Nail Gun Turret and a Tesla Coil. Each has its own model and icon and unlocks at a Defense skill level. You can change health, damage, range, timing, slowing, power, repairs, siege size, unlock level and materials, and one setting lets you remove it safely.
 
 Description (BBCode):
 [center][img]https://sldb.core-directive.com/media/save/3-remove-with-care.png[/img][/center]
