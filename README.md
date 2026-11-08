@@ -8,7 +8,7 @@ Adds five new defenses to build against the siege in Survival Log. Each has its 
 - **Nail Gun Turret**: needs power (4). It turns to face one zombie up to 4 m away and fires for 8 damage every 1.5 seconds, and stops working below half health until it is repaired.
 - **Tesla Coil**: needs power (6). Every 3 seconds it shocks up to 8 zombies within 3 m for 18 damage and slows them by 20% for 2 seconds.
 
-Zombies go for them the way they go for the game's own defenses, Repair Parts fix them, and they count toward the size of the next siege like the game's own.
+Zombies attack them just like Sandbags and the rest, Repair Parts fix them, and they count toward the size of the next siege.
 
 ## Getting them
 
@@ -21,8 +21,6 @@ Zombies go for them the way they go for the game's own defenses, Repair Parts fi
 - **Test buttons**: with Cheat Menu installed, its Mod tests tab shows each defense's numbers, shows all five recipes right away, gives you one of each defense, or starts a large test wave.
 
 Every number above (health, materials, unlock levels, repairs, siege size, damage, timing, range, targets, slowing and power) is a setting (see Settings). Changes apply at once, to the defenses already standing too.
-
-This is an early test build.
 
 ## Settings
 
@@ -50,4 +48,20 @@ Then delete `DefensesExpanded.dll` from the `BepInEx\plugins` folder. For a clea
 
 ## Install
 
-Copy `DefensesExpanded.dll` into `BepInEx/plugins`.
+Extract the release zip into the game folder (the folder with `SurvivalLog.exe`), so `DefensesExpanded.dll` lands in `BepInEx\plugins`. Install BepInEx and Exiled's Toolkit first.
+
+## Known issues
+
+The new defenses can't be dyed. Each one uses the sounds of the game's defense it is based on.
+
+## Feedback and bug reports
+
+Found a bug, have an idea, or something feels off? Come say so on the Core Directive Discord: https://discord.gg/trTsyxUFqg . You can also post in the Posts tab of the mod's Nexus Mods page. When reporting a bug, attach `BepInEx\LogOutput.log`.
+
+To reach me directly, message `exiled.dev` on Discord, you can find me in the [official Survival Log Discord](https://discord.gg/MZGg4gQAUe). I'm also on X as [@AnExiledDev](https://x.com/AnExiledDev).
+
+A Survival Log wiki with detailed documentation for all of my mods is coming soon.
+
+## License
+
+MIT. Copyright (c) 2026 AnExiledDev. See [LICENSE](LICENSE).

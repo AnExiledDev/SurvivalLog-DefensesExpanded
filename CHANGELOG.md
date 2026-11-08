@@ -3,7 +3,7 @@
 ## 0.2.0
 
 - Each defense now unlocks at a Defense skill level: the Concrete Barrier, Barbed Wire and Spike Plate at level 2, the Nail Gun Turret at level 3 and the Tesla Coil at level 5. A new `UnlockLevel` setting for each defense changes it.
-- The recipes are cheaper for the early defenses and dearer for the late ones, and the damage now rises with the level each one unlocks at. See Settings for the new numbers.
+- The early defenses cost less to make and the late ones cost more, and a defense that unlocks later now does more damage. See Settings for the new numbers.
 - The Nail Gun Turret turns its head to face the zombie it is shooting and kicks back on each shot.
 - The Nail Gun Turret and Tesla Coil now face the right way.
 - Placing a defense no longer freezes the game for a moment: each model is built a few seconds into a run instead of on its first placement.
@@ -26,9 +26,9 @@
 
 ## 0.1.1
 
-- Changing a setting no longer costs a damaged defense health when a talent has raised its most. Only a change to `Health` moves it, keeping its share.
+- Changing a setting no longer costs a damaged defense health when a talent has raised its maximum health. Only a change to `Health` moves it, and the defense keeps the same share of its health.
 - With `UninstallPrep` on, a placed Concrete Barrier is saved with no more health than Sandbags can hold.
-- A defense's strike effect can no longer leave it reading as the game's defense if the game's effect step fails.
+- Fixed: a defense could show as the game's defense it is based on if its attack effect failed to play.
 
 ## 0.1.0
 
