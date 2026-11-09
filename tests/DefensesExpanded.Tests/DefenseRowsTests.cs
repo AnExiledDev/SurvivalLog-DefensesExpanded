@@ -50,7 +50,7 @@ public class DefenseRowsTests
         Assert.All(plan.Rows, row => Assert.NotEqual(row.CopyFrom, row.Id));
     }
 
-    // Every id must be clear of the game's own and of the other defenses', or one row would replace another.
+    // Every id must be clear of the game's and of the other defenses', or one row would replace another.
     [Fact]
     public void NoTwoDefensesShareAnIdAndNoneUsesAStockId()
     {
@@ -207,7 +207,7 @@ public class DefenseRowsTests
         Assert.Contains(DefenseRows.Problems(plan, Free(plan), _ => 401), reason => reason.Contains("Recipe 401"));
     }
 
-    // The game's own text and the mod's must match in both languages, or one language shows a raw key.
+    // The game's text and the mod's must match in both languages, or one language shows a raw key.
     [Theory]
     [MemberData(nameof(Keys))]
     public void EveryTextTheRowsNameExistsInBothLanguages(string key)

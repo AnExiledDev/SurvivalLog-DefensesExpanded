@@ -28,7 +28,7 @@ public sealed class Plugin : BasePlugin
         LiveSettings.Watch(uninstallPrep, isOn =>
         {
             UninstallPrep.Set(isOn);
-            if (isOn) Log.LogInfo("Uninstall prep is on: load a save to turn the defense packages into the game's own defense packages");
+            if (isOn) Log.LogInfo("Uninstall prep is on: load a save to turn the defense packages into the game's defense packages");
         });
 
         var tables = new DefenseTables(message => Log.LogInfo(message));

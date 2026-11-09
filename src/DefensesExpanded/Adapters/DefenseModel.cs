@@ -273,7 +273,7 @@ internal static class DefenseModel
 
             foreach (var renderer in made) list.Add(renderer);
 
-            // The ivy stays the game's own.
+            // The ivy stays the game's.
             var ours = new HashSet<IntPtr>(made.Select(renderer => renderer.Pointer));
 
             foreach (var renderer in copy.GetComponentsInChildren<MeshRenderer>(true))

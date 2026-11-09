@@ -79,7 +79,7 @@ public static class DefenseRows
     {
         Name = "Concrete Barrier",
         Key = "Barrier",
-        // Far above the game's own ids (1.1.20151: item 70152, furniture 90291, recipe 1703), and clear of Wind Power's
+        // Far above the game's ids (1.1.20151: item 70152, furniture 90291, recipe 1703), and clear of Wind Power's
         // 910000 and Hydroponics Expanded's 920000 ranges.
         Ids = new RowIds(Item: 930001, Furniture: 930001, Recipe: 9301, Action: 100930001, Effect: 100930001),
         Stock = Sandbags,

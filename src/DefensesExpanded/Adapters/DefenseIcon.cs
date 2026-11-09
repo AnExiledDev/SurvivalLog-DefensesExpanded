@@ -8,7 +8,7 @@ using DefensesExpanded.Core;
 namespace DefensesExpanded.Adapters;
 
 /// <summary>
-/// Puts each defense's icon where the game's web UI looks for pictures, next to the game's own furniture icons. An icon
+/// Puts each defense's icon where the game's web UI looks for pictures, next to the game's furniture icons. An icon
 /// is written only when the file there is missing or differs, so a mod update brings its new icon.
 /// </summary>
 internal static class DefenseIcon

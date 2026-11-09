@@ -18,7 +18,7 @@ public static class DevCheats
     private const string NotInGame = "load a save first";
     private const int HoursPerDay = 24;
 
-    // The game's own late story wave: every zombie type, from both spawn points.
+    // The game's late story wave: every zombie type, from both spawn points.
     private const int TestWaveEvent = 40673;
     private const float TestWaveCountMultiplier = 4f;
     private const float TestWaveAliveCapMultiplier = 4f;

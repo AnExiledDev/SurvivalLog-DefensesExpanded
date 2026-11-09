@@ -59,7 +59,7 @@ internal static class FxPatches
         }
     }
 
-    // A finalizer, so the id comes back even when the game's own step throws; returning null lets the game's
+    // A finalizer, so the id comes back even when the game's step throws; returning null lets the game's
     // exception through as it was.
     private static Exception? AsOurs(AgentModel __0, int __state, Exception? __exception)
     {

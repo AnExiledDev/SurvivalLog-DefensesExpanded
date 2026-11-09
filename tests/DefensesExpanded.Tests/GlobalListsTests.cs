@@ -3,7 +3,7 @@ using Xunit;
 
 namespace DefensesExpanded.Tests;
 
-// The game's own entries in these settings must survive every write, and ours must never pile up.
+// The game's entries in these settings must survive every write, and ours must never pile up.
 public class GlobalListsTests
 {
     private static readonly int[] Ours = { 930001, 930002 };
