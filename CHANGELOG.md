@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2
+
+- If a game update stops the mod from hooking into the game, the Mod Manager now shows that the mod may need an update.
+- Made for Survival Log 1.1.20719.
+
 ## 0.2.1
 
 - The Nail Gun Turret's aiming does less work each frame while turrets are firing.

@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
 using ExiledToolkit.Game;
-using HarmonyLib;
 using DefensesExpanded.Core;
 using Il2CppAgentSaves = Il2CppSystem.Collections.Generic.List<GameCore.HotUpdate.AgentSave>;
 
@@ -18,17 +16,18 @@ namespace DefensesExpanded.Adapters;
 /// </summary>
 internal static class SavePatches
 {
-    private static readonly HashSet<string> Failed = new();
-    private static Action<string> _log = _ => { };
+    private const string IfMissed = "defenses may not save as their stock twins";
 
-    public static void Apply(Harmony harmony, Action<string> log)
+    private static PatchKit? _hooks;
+
+    public static void Apply(PatchKit hooks)
     {
-        _log = log;
+        _hooks = hooks;
 
-        Hook(harmony, typeof(Furniture), "SaveGame", postfix: nameof(SaveAsStock));
-        Hook(harmony, typeof(BagFurniture), "SaveGame", postfix: nameof(SaveAsStock));
-        Hook(harmony, typeof(AgentManager), "DeduplicateAgentSavesForLoad", prefix: nameof(LoadAsDefense));
-        Hook(harmony, typeof(GameSaveManager), "CloneAgentSave", postfix: nameof(KeepMarkerOnClone));
+        hooks.Patch(typeof(SavePatches), typeof(Furniture), "SaveGame", postfix: nameof(SaveAsStock), consequence: IfMissed);
+        hooks.Patch(typeof(SavePatches), typeof(BagFurniture), "SaveGame", postfix: nameof(SaveAsStock), consequence: IfMissed);
+        hooks.Patch(typeof(SavePatches), typeof(AgentManager), "DeduplicateAgentSavesForLoad", prefix: nameof(LoadAsDefense), consequence: IfMissed);
+        hooks.Patch(typeof(SavePatches), typeof(GameSaveManager), "CloneAgentSave", postfix: nameof(KeepMarkerOnClone), consequence: IfMissed);
     }
 
     private static void SaveAsStock(AgentSave __0)
@@ -50,7 +49,7 @@ internal static class SavePatches
         }
         catch (Exception ex)
         {
-            Fail("save", ex);
+            _hooks?.Fail("saving a defense as its stock twin", ex);
         }
     }
 
@@ -73,7 +72,7 @@ internal static class SavePatches
         }
         catch (Exception ex)
         {
-            Fail("load", ex);
+            _hooks?.Fail("loading a stock twin back as a defense", ex);
         }
     }
 
@@ -85,7 +84,7 @@ internal static class SavePatches
         }
         catch (Exception ex)
         {
-            Fail("chapter move", ex);
+            _hooks?.Fail("keeping a defense through a chapter move", ex);
         }
     }
 
@@ -102,34 +101,5 @@ internal static class SavePatches
         save.AgentConfigId = fields.AgentConfigId;
         save.BagFurnitureConfigId = fields.BagFurnitureConfigId;
         save.Name = fields.Name;
-    }
-
-    private static void Hook(Harmony harmony, Type type, string method, string? prefix = null, string? postfix = null)
-    {
-        try
-        {
-            var target = AccessTools.Method(type, method);
-
-            if (target == null)
-            {
-                _log($"cannot find {type.Name}.{method}, so defenses may not save as their stock twins");
-
-                return;
-            }
-
-            harmony.Patch(
-                target,
-                prefix: prefix == null ? null : new HarmonyMethod(typeof(SavePatches), prefix),
-                postfix: postfix == null ? null : new HarmonyMethod(typeof(SavePatches), postfix));
-        }
-        catch (Exception ex)
-        {
-            _log($"cannot hook {type.Name}.{method}: {ex.Message}");
-        }
-    }
-
-    private static void Fail(string where, Exception ex)
-    {
-        if (Failed.Add(where)) _log($"the defenses' {where} step failed (reported once): {ex}");
     }
 }

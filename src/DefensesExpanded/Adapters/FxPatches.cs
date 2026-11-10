@@ -1,7 +1,7 @@
 using System;
 using DefensesExpanded.Core;
 using GameCore.HotUpdate.Battle.Show;
-using HarmonyLib;
+using ExiledToolkit.Game;
 using UnityEngine;
 
 namespace DefensesExpanded.Adapters;
@@ -14,30 +14,13 @@ namespace DefensesExpanded.Adapters;
 /// </summary>
 internal static class FxPatches
 {
-    private static Action<string> _log = _ => { };
-    private static bool _failed;
+    private static PatchKit? _hooks;
 
-    public static void Apply(Harmony harmony, Action<string> log)
+    public static void Apply(PatchKit hooks)
     {
-        _log = log;
+        _hooks = hooks;
 
-        try
-        {
-            var target = AccessTools.Method(typeof(TowerDefenseShowManager), "PlayStrikeFx");
-
-            if (target == null)
-            {
-                _log("cannot find TowerDefenseShowManager.PlayStrikeFx, so the defenses' attacks show no effect");
-
-                return;
-            }
-
-            harmony.Patch(target, prefix: new HarmonyMethod(typeof(FxPatches), nameof(AsStock)), finalizer: new HarmonyMethod(typeof(FxPatches), nameof(AsOurs)));
-        }
-        catch (Exception ex)
-        {
-            _log($"cannot hook TowerDefenseShowManager.PlayStrikeFx, so the defenses' attacks show no effect: {ex.Message}");
-        }
+        hooks.Patch(typeof(FxPatches), typeof(TowerDefenseShowManager), "PlayStrikeFx", prefix: nameof(AsStock), finalizer: nameof(AsOurs), consequence: "the defenses' attacks show no effect");
     }
 
     private static void AsStock(AgentModel __0, AgentModel __1, out int __state)
@@ -55,7 +38,7 @@ internal static class FxPatches
         }
         catch (Exception ex)
         {
-            Fail(ex);
+            _hooks?.Fail("showing a defense's strike effect", ex);
         }
     }
 
@@ -69,17 +52,9 @@ internal static class FxPatches
         }
         catch (Exception ex)
         {
-            Fail(ex);
+            _hooks?.Fail("giving a defense its id back after its strike effect", ex);
         }
 
         return __exception;
-    }
-
-    private static void Fail(Exception ex)
-    {
-        if (_failed) return;
-
-        _failed = true;
-        _log($"the defenses' strike effect step failed (reported once): {ex}");
     }
 }

@@ -6,6 +6,7 @@ using BepInEx.Unity.IL2CPP;
 using DefensesExpanded.Adapters;
 using DefensesExpanded.Core;
 using ExiledToolkit;
+using ExiledToolkit.Game;
 using HarmonyLib;
 
 namespace DefensesExpanded;
@@ -15,7 +16,7 @@ namespace DefensesExpanded;
 public sealed class Plugin : BasePlugin
 {
     private const string Guid = "com.dev.survivallog.defensesexpanded";
-    private const string Version = "0.2.1";
+    private const string Version = "0.2.2";
 
     public override void Load()
     {
@@ -32,12 +33,12 @@ public sealed class Plugin : BasePlugin
         });
 
         var tables = new DefenseTables(message => Log.LogInfo(message));
-        var harmony = new Harmony(Guid);
+        var hooks = new PatchKit(new Harmony(Guid), Warn);
         var iconPlaced = false;
 
-        SavePatches.Apply(harmony, message => Log.LogWarning(message));
-        FxPatches.Apply(harmony, message => Log.LogWarning(message));
-        DefenseModel.Apply(harmony, message => Log.LogInfo(message));
+        SavePatches.Apply(hooks);
+        FxPatches.Apply(hooks);
+        DefenseModel.Apply(hooks, message => Log.LogInfo(message));
 
         DefenseTicker.Log = message => Log.LogError(message);
         UninstallPrep.Log = message => Log.LogInfo(message);
@@ -56,6 +57,13 @@ public sealed class Plugin : BasePlugin
         };
         AddComponent<DefenseTicker>();
         Log.LogInfo($"Defenses Expanded {Version} loaded");
+    }
+
+    /// <summary>A hook that could not be placed is an error, so the Mod Manager can show the mod may need an update.</summary>
+    private void Warn(string message)
+    {
+        if (HookFailure.Is(message)) Log.LogError(message);
+        else Log.LogWarning(message);
     }
 
     /// <summary>
