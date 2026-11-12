@@ -61,7 +61,7 @@ internal static class UninstallPrep
         }
 
         if (packages + saved > 0)
-            Log($"Uninstall prep: {packages} defense packages here and {saved} saved elsewhere turned into the stock defense packages. Save the game, then remove DefensesExpanded.dll.");
+            Log($"Uninstall prep: {packages} defense packages in this place and {saved} in other places were turned into the packages of the game defenses they are based on. Save the game, then remove DefensesExpanded.dll.");
     }
 
     /// <summary>The defense packages in the place loaded now, wherever they lie. Each bag's weight is kept right.</summary>

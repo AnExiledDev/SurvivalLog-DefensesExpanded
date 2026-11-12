@@ -50,7 +50,7 @@ public static class DevCheats
     }
 
     [DisplayName("Start a large test wave\n开始一波大型测试尸潮")]
-    [Description("Starts a zombie wave now, four times the size of the game's late story wave, with every zombie type from both spawn points. The zombies have their plain health and attack, so the defenses' damage reads true. A wave already under way is ended first.\n立即开始一波尸潮，规模是游戏后期剧情尸潮的四倍，所有丧尸种类从两个出生点出现。丧尸保持原本的生命和攻击，方便看清防御设施的伤害。正在进行的尸潮会先结束。")]
+    [Description("Starts a zombie wave now, four times the size of the game's late story wave, with every zombie type from both spawn points. The zombies keep their normal health and attack, so you can see how much damage the defenses really do. A wave already under way is ended first.\n立即开始一波尸潮，规模是游戏后期剧情尸潮的四倍，所有丧尸种类从两个出生点出现。丧尸保持正常的生命和攻击，方便看清防御设施的真实伤害。正在进行的尸潮会先结束。")]
     public static string StartLargeWave()
     {
         var waves = GameSingleton.Existing<BattleLogicWorld>()?._TowerWaveManager;
@@ -119,7 +119,7 @@ public static class DevCheats
     }
 
     [DisplayName("Show all recipes now\n立即显示所有配方")]
-    [Description("Shows every new defense's recipe at the workbench now, without finding the stock defense recipes first.\n不必先获得原版防御设施的配方，立即在工作台显示所有新防御设施的配方。")]
+    [Description("Shows every new defense's recipe at the workbench now, without getting any of the game's defense recipes first.\n不必先获得游戏里的防御设施配方，立即在工作台显示所有新防御设施的配方。")]
     public static string ShowAllRecipes()
     {
         var tool = GameSingleton.Existing<BattleLogicWorld>()?._ToolTableManager;

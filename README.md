@@ -1,44 +1,43 @@
 # Defenses Expanded
 
-Adds five new defenses to build against the siege in Survival Log. Each has its own model and icon, and unlocks at a Defense skill level.
+Adds five new defenses to build against the siege in Survival Log. Each has its own model and icon, and unlocks at a Defense skill level. The numbers below are the defaults, and you can change every one of them in the settings.
 
-- **Concrete Barrier**: a heavy wall of cast concrete. It blocks zombies like Sandbags, with 1500 health against their 600, and each Repair Parts puts back 300.
-- **Barbed Wire**: zombies can walk through it, but it cuts every one in reach (up to 6) for 1 damage every 2 seconds and slows them by 40% for 4 seconds.
-- **Spike Plate**: laid flat on the ground. Zombies walk over it and take 3 damage every 2 seconds, up to 6 at once.
-- **Nail Gun Turret**: needs power (4). It turns to face one zombie up to 4 m away and fires for 8 damage every 1.5 seconds, and stops working below half health until it is repaired.
-- **Tesla Coil**: needs power (6). Every 3 seconds it shocks up to 8 zombies within 3 m for 18 damage and slows them by 20% for 2 seconds.
+- **Concrete Barrier**: a heavy wall of cast concrete. It blocks zombies like Sandbags do, but with 1500 health instead of 600, and each Repair Parts puts back 300 health.
+- **Barbed Wire**: zombies can walk through it, but it cuts up to 6 of them at a time for 1 damage every 2 seconds and slows them by 40% for 4 seconds.
+- **Spike Plate**: it lies flat on the ground. Zombies walk over it and take 3 damage every 2 seconds, up to 6 of them at once.
+- **Nail Gun Turret**: runs on 4 power. It turns to face one zombie up to 4 m away and fires for 8 damage every 1.5 seconds. Below half health it stops working until you repair it.
+- **Tesla Coil**: runs on 6 power. Every 3 seconds it shocks up to 8 zombies within 3 m for 18 damage and slows them by 20% for 2 seconds.
 
-Zombies attack them just like Sandbags and the rest, Repair Parts fix them, and they count toward the size of the next siege.
+Zombies attack them like any other defense, and you fix them with Repair Parts. Each one you build also makes the next siege a bit bigger.
 
 ## Getting them
 
-- The recipes show at the workbench once you have any of the game's defense recipes, and each one unlocks at a Defense skill level: the Concrete Barrier, Barbed Wire and Spike Plate at level 2, the Nail Gun Turret at level 3 and the Tesla Coil at level 5. The game's Electric Trap needs level 3 and its Mechanical Chainsaw level 4.
+The recipes show up at the workbench once you have any of the game's defense recipes. Each one unlocks at a Defense skill level: the Concrete Barrier, Barbed Wire and Spike Plate at level 2, the Nail Gun Turret at level 3 and the Tesla Coil at level 5. For comparison, the game's Electric Trap needs level 3 and its Mechanical Chainsaw level 4.
+
 - Concrete Barrier: 4 Scrap Metal and 1 Iron Rod.
 - Barbed Wire: 3 Scrap Metal and 2 Wire.
 - Spike Plate: 2 Scrap Metal and 1 Iron Rod.
 - Nail Gun Turret: 1 Electronic Components, 1 Iron Rod and 3 Scrap Metal.
 - Tesla Coil: 2 Electronic Components, 3 Wire and 2 Scrap Metal.
-- **Test buttons**: with Cheat Menu installed, its Mod tests tab shows each defense's numbers, shows all five recipes right away, gives you one of each defense, or starts a large test wave.
-
-Every number above (health, materials, unlock levels, repairs, siege size, damage, timing, range, targets, slowing and power) is a setting (see Settings). Changes apply at once, to the defenses already standing too.
+With Cheat Menu installed, its Mod tests tab has test buttons that show each defense's numbers, show all five recipes right away, give you one of each defense and start a large test wave.
 
 ## Settings
 
-Settings live in `BepInEx\config\com.dev.survivallog.defensesexpanded.cfg`, created the first time the game starts with the mod. Change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. See [CONFIG.md](CONFIG.md) for every setting.
+The settings are in `BepInEx\config\com.dev.survivallog.defensesexpanded.cfg`, which is made the first time you start the game with the mod. You can change them in game on the Mod Manager's Mods screen, or edit the file while the game is closed. A change on the Mods screen applies right away, to the defenses you've already placed too. See [CONFIG.md](CONFIG.md) for every setting.
 
 ## Save safety
 
-The game saves each defense as the game's defense it is based on (the Concrete Barrier as Sandbags, Barbed Wire and the Spike Plate as the Spike Barrier, the Nail Gun Turret as the Mechanical Chainsaw, the Tesla Coil as the Electric Trap), and the mod turns it back when the save loads. Without the mod they become those defenses and the save still loads.
+Each defense is saved as the game defense it is based on: the Concrete Barrier as Sandbags, Barbed Wire and the Spike Plate as the Spike Barrier, the Nail Gun Turret as the Mechanical Chainsaw and the Tesla Coil as the Electric Trap. When the save loads, the mod turns them back. If you load the save without the mod, they show up as those game defenses and the save still loads.
 
 ## Uninstall
 
-A defense package in a bag or in storage would be lost without the mod, so do this first:
+Defense packages in your bags or storage would be lost without the mod, so do this first:
 
 1. Turn on `UninstallPrep` (on the Mods screen, or in the config file while the game is closed).
-2. Load your save. Every defense package, wherever it is, becomes the package of the game's defense it is based on. `BepInEx\LogOutput.log` says what was changed.
-3. Save the game and quit.
+2. Load your save. Every defense package, wherever it is, turns into the package of the game defense it is based on. `BepInEx\LogOutput.log` lists what was changed.
+3. Save the game and quit. Do steps 2 and 3 for every save you want to keep.
 
-Then delete `DefensesExpanded.dll` from the `BepInEx\plugins` folder. For a clean slate, also delete `com.dev.survivallog.defensesexpanded.cfg` from `BepInEx\config`. Do this for each save you want to keep.
+Then delete `DefensesExpanded.dll` from the `BepInEx\plugins` folder. To remove the settings too, also delete `com.dev.survivallog.defensesexpanded.cfg` from `BepInEx\config`.
 
 ## Requirements
 
@@ -53,7 +52,7 @@ Download `DefensesExpanded-x.y.z.zip` from the [latest release](https://github.c
 
 ## Known issues
 
-The new defenses can't be dyed. Each one uses the sounds of the game's defense it is based on.
+The new defenses can't be dyed. Each one uses the sounds of the game defense it is based on.
 
 ## Feedback and bug reports
 

@@ -59,7 +59,7 @@ internal static class DefenseModel
     /// <param name="log">For the model's own lines; a hook that cannot be placed is logged by <paramref name="hooks"/>.</param>
     public static void Apply(PatchKit hooks, Action<string> log)
     {
-        const string ifMissed = "the defenses may look like the stock ones";
+        const string ifMissed = "the defenses may look like the game defenses they are based on";
 
         _log = log;
 

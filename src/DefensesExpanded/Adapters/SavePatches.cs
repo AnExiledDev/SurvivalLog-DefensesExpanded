@@ -16,7 +16,7 @@ namespace DefensesExpanded.Adapters;
 /// </summary>
 internal static class SavePatches
 {
-    private const string IfMissed = "defenses may not save as their stock twins";
+    private const string IfMissed = "the defenses may not save and load correctly";
 
     private static PatchKit? _hooks;
 
@@ -49,7 +49,7 @@ internal static class SavePatches
         }
         catch (Exception ex)
         {
-            _hooks?.Fail("saving a defense as its stock twin", ex);
+            _hooks?.Fail("saving a defense as the game defense it is based on", ex);
         }
     }
 
@@ -72,7 +72,7 @@ internal static class SavePatches
         }
         catch (Exception ex)
         {
-            _hooks?.Fail("loading a stock twin back as a defense", ex);
+            _hooks?.Fail("loading a defense back from the save", ex);
         }
     }
 
