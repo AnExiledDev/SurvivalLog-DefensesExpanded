@@ -12,11 +12,11 @@ using HarmonyLib;
 namespace DefensesExpanded;
 
 [BepInPlugin(Guid, "Defenses Expanded", Version)]
-[BepInDependency("com.dev.survivallog.exiledtoolkit", ">=0.19.0")]
+[BepInDependency("com.dev.survivallog.exiledtoolkit", ">=0.28.0")]
 public sealed class Plugin : BasePlugin
 {
-    private const string Guid = "com.dev.survivallog.defensesexpanded";
-    private const string Version = "0.2.3";
+    internal const string Guid = "com.dev.survivallog.defensesexpanded";
+    private const string Version = "0.2.4";
 
     public override void Load()
     {

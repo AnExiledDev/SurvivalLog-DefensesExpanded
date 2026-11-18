@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4
+
+- Mod Manager's Conflicts tab can now see what Defenses Expanded adds to the game, like the defenses and the defense skill levels that unlock them, so it can show when another mod changes the same things.
+- Now needs Exiled's Toolkit 0.28.0 or newer.
+- Made for Survival Log 1.1.21271.
+
 ## 0.2.3
 
 - Clearer wording in the settings, the Cheat Menu test buttons and the log.

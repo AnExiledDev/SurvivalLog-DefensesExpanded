@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DefensesExpanded.Core;
+using ExiledToolkit;
 using ExiledToolkit.Game;
 using GameCore.HotUpdate;
 using GameCore.HotUpdate.Battle.Logic;
@@ -16,7 +17,8 @@ namespace DefensesExpanded.Adapters;
 /// settings that list defenses by id, then rebuilds the game's lookups that were made from them. It writes again when
 /// the game loads a table afresh or a setting changes, over its own rows where they already are, and then brings the
 /// defenses already standing in a run up to the new settings, and puts each recipe at its defense skill level. Every few
-/// seconds it also shows the defenses' recipes to a player who was already shown any stock defense recipe.
+/// seconds it also shows the defenses' recipes to a player who was already shown any stock defense recipe. Each write
+/// is reported to Exiled's Toolkit, so Mod Manager can tell which mod changed what.
 /// </summary>
 internal sealed class DefenseTables
 {
@@ -198,12 +200,15 @@ internal sealed class DefenseTables
 
                 row = new Config_GlobalSetting { ID = name, Params3 = "" };
                 globals[name] = row;
+                Claims.AddedRows(Plugin.Guid, nameof(Config_GlobalSetting), new[] { name });
                 _log($"the game has no {name} setting, so the mod adds it");
             }
 
             var merged = GlobalLists.Merge(row.Params3, keyIndex, ours, mine);
 
             if (merged != (row.Params3 ?? "")) row.Params3 = merged;
+
+            Claims.AddedTo(Plugin.Guid, nameof(Config_GlobalSetting), name, nameof(Config_GlobalSetting.Params3), mine);
         }
     }
 
@@ -301,17 +306,20 @@ internal sealed class DefenseTables
 
             if (row == null) continue;
 
-            Rewrite(row.unlock_recipes, false);
-            Rewrite(row.unlock_recipes_P1, true);
-            Rewrite(row.unlock_recipes_P2, true);
-            Rewrite(row.unlock_recipes_P3, true);
-            Rewrite(row.unlock_recipes_P4, true);
+            Rewrite(row.unlock_recipes, nameof(Config_DefenseLv.unlock_recipes), false);
+            Rewrite(row.unlock_recipes_P1, nameof(Config_DefenseLv.unlock_recipes_P1), true);
+            Rewrite(row.unlock_recipes_P2, nameof(Config_DefenseLv.unlock_recipes_P2), true);
+            Rewrite(row.unlock_recipes_P3, nameof(Config_DefenseLv.unlock_recipes_P3), true);
+            Rewrite(row.unlock_recipes_P4, nameof(Config_DefenseLv.unlock_recipes_P4), true);
 
-            void Rewrite(Il2CppInts? list, bool roleList)
+            void Rewrite(Il2CppInts? list, string field, bool roleList)
             {
                 if (list == null) return;
 
                 var now = UnlockLevels.Rebuild(ToArray(list), roleList, row.Lv, ours, unlockAt);
+
+                // A level that lists none of our recipes sends an empty list, which takes back what was reported before.
+                Claims.AddedTo(Plugin.Guid, nameof(Config_DefenseLv), pair.Key, field, now.Where(ours.Contains));
 
                 if (now.SequenceEqual(ToArray(list))) return;
 
@@ -531,6 +539,7 @@ internal sealed class DefenseTables
 
             _table[plan.Id] = row;
             ours.Add(row.Pointer);
+            Claims.AddedRows(Plugin.Guid, typeof(T).Name, new[] { plan.Id });
 
             return refused;
         }
