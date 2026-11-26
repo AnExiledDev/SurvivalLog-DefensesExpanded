@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.6
+
+- Small speed up: the mod no longer checks the defense recipes every few seconds. It checks them only when the game shows or unlocks a recipe, or loads a save.
+- Small speed up: the mod reads the time in a cheaper way.
+- Fixed a rare case where a defense could be saved as itself instead of as the stock defense it copies.
+- Fixed a rare case where a new turret's heads would not turn toward zombies.
+- Made for Survival Log 1.1.21671.
+
 ## 0.2.5
 
 - Fixed: if a defense could not be added to the game, for example because another mod uses the same id, loading a save with that defense in it could go wrong. Now it stays the stock defense it copies for that load and turns back once it can be added again.

@@ -16,14 +16,14 @@ namespace DefensesExpanded.Adapters;
 /// Writes the defenses' rows and text into the game's tables once they are loaded, adds their entries to the game
 /// settings that list defenses by id, then rebuilds the game's lookups that were made from them. It writes again when
 /// the game loads a table afresh or a setting changes, over its own rows where they already are, and then brings the
-/// defenses already standing in a run up to the new settings, and puts each recipe at its defense skill level. Every few
-/// seconds it also shows the defenses' recipes to a player who was already shown any stock defense recipe. Each write
-/// is reported to Exiled's Toolkit, so Mod Manager can tell which mod changed what.
+/// defenses already standing in a run up to the new settings, and puts each recipe at its defense skill level. When the
+/// game shows a recipe or loads a save, it also shows the defenses' recipes to a player who was already shown any stock
+/// defense recipe (see <see cref="RecipeWakes"/>). Each write is reported to Exiled's Toolkit, so Mod Manager can tell which mod changed what.
 /// </summary>
 internal sealed class DefenseTables
 {
     private const float CheckSeconds = 1f;
-    private const float RevealSeconds = 5f;
+    private const double RevealPollSeconds = 5;
     private const float RetrySeconds = 30f;
 
     // The six row tables, the game settings, the two languages and the defense skill levels.
@@ -33,6 +33,7 @@ internal sealed class DefenseTables
     private readonly IntPtr[] _seen = new IntPtr[Watched];
     private readonly IntPtr[] _applied = new IntPtr[Watched];
     private readonly List<Reveal> _reveals = new();
+    private readonly RevealGate _revealGate = new(RevealPollSeconds);
     private HashSet<IntPtr> _ours = new();
 
     /// <summary>
@@ -43,7 +44,6 @@ internal sealed class DefenseTables
     public static IReadOnlyList<DefenseKind> Written { get; private set; } = Array.Empty<DefenseKind>();
     private IReadOnlyList<DefenseSettings>? _appliedSettings;
     private float _nextCheckAt;
-    private float _nextRevealAt;
 
     public DefenseTables(Action<string> log)
     {
@@ -52,11 +52,7 @@ internal sealed class DefenseTables
 
     public void Tick(float now)
     {
-        if (now >= _nextRevealAt)
-        {
-            _nextRevealAt = now + RevealSeconds;
-            ShowRecipes();
-        }
+        if (_revealGate.IsDue(now, RecipeWakes.Count, RecipeWakes.IsPolling)) ShowRecipes();
 
         if (now < _nextCheckAt) return;
 
@@ -345,6 +341,7 @@ internal sealed class DefenseTables
     private void KeepReveals(Il2CppDictionary.Dictionary<int, Config_ProductionList> recipes, IReadOnlyList<DefenseKind> kinds)
     {
         _reveals.Clear();
+        _revealGate.Again();
 
         var stock = DefenseRows.StockRecipes.Where(recipes.ContainsKey).Select(id => recipes[id]).ToList();
 

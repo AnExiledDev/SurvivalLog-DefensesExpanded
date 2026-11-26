@@ -31,7 +31,7 @@ internal static class FxPatches
         {
             if (__0 == null || DefenseRows.ByFurniture(__0.configId) is not { } kind) return;
 
-            if (kind == DefenseRows.Turret) TurretAim.Fired(__0.Obj, __1?.Obj, Time.realtimeSinceStartup);
+            if (kind == DefenseRows.Turret) TurretAim.Fired(__0.Obj, __1?.Obj, DefenseTicker.Now);
 
             __state = __0.configId;
             __0.configId = kind.Stock.Furniture;

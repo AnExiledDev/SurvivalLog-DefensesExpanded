@@ -16,7 +16,7 @@ namespace DefensesExpanded;
 public sealed class Plugin : BasePlugin
 {
     internal const string Guid = "com.dev.survivallog.defensesexpanded";
-    private const string Version = "0.2.5";
+    private const string Version = "0.2.6";
 
     public override void Load()
     {
@@ -37,6 +37,7 @@ public sealed class Plugin : BasePlugin
         var iconPlaced = false;
 
         SavePatches.Apply(hooks);
+        RecipeWakes.Apply(hooks);
         FxPatches.Apply(hooks);
         DefenseModel.Apply(hooks, message => Log.LogInfo(message));
 

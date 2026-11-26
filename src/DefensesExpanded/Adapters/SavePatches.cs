@@ -28,6 +28,7 @@ internal static class SavePatches
         hooks.Patch(typeof(SavePatches), typeof(BagFurniture), "SaveGame", postfix: nameof(SaveAsStock), consequence: IfMissed);
         hooks.Patch(typeof(SavePatches), typeof(AgentManager), "DeduplicateAgentSavesForLoad", prefix: nameof(LoadAsDefense), consequence: IfMissed);
         hooks.Patch(typeof(SavePatches), typeof(GameSaveManager), "CloneAgentSave", postfix: nameof(KeepMarkerOnClone), consequence: IfMissed);
+        hooks.Patch(typeof(SavePatches), typeof(AgentManager), "SaveGame", new[] { typeof(SaveChildData), typeof(int) }, postfix: nameof(ChapterAsStock), consequence: IfMissed);
     }
 
     private static void SaveAsStock(AgentSave __0)
@@ -46,6 +47,27 @@ internal static class SavePatches
             // would load without the mod over the most, so it is saved at that most.
             if (UninstallPrep.IsOn && !fields.IsBagFurniture && GameSingleton.Existing<ConfigManager>()?.Get_Config_Furniture(fields.AgentConfigId) is { } stock && stock.FurnitureHPMax > 0 && __0.FurnitureDurability > stock.FurnitureHPMax)
                 __0.FurnitureDurability = stock.FurnitureHPMax;
+        }
+        catch (Exception ex)
+        {
+            _hooks?.Fail("saving a defense as the game defense it is based on", ex);
+        }
+    }
+
+    /// <summary>
+    /// After a normal save every entry is a fresh one that is already a stock defense, so nothing changes. When
+    /// SaveGame kept the list from the last load instead, its defenses become stock ones here.
+    /// </summary>
+    private static void ChapterAsStock(SaveChildData __0, int __1)
+    {
+        try
+        {
+            Il2CppAgentSaves? list = null;
+
+            if (__0?._ChapterAgentMap_k__BackingField?.TryGetValue(__1, out list) != true || list == null) return;
+
+            for (var i = 0; i < list.Count; i++)
+                if (list[i] is { } save) SaveAsStock(save);
         }
         catch (Exception ex)
         {

@@ -27,7 +27,8 @@ internal static class TurretAim
     {
         if (turret == null) return;
 
-        if (!Aimers.TryGetValue(turret.Pointer, out var aimer))
+        // Keyed by address, so a turret placed where a packed one was can find that one's aimer with dead heads.
+        if (!Aimers.TryGetValue(turret.Pointer, out var aimer) || aimer.HasLostAHead)
         {
             aimer = new Aimer(turret, FindHeads(turret.transform));
             Aimers[turret.Pointer] = aimer;
@@ -126,5 +127,16 @@ internal static class TurretAim
         public float[] Yaw { get; }
         public Transform? Target { get; set; }
         public float FiredAt { get; set; }
+
+        public bool HasLostAHead
+        {
+            get
+            {
+                for (var h = 0; h < Heads.Length; h++)
+                    if (Heads[h] == null) return true;
+
+                return false;
+            }
+        }
     }
 }
