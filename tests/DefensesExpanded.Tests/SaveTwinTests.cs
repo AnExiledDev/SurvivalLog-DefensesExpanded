@@ -11,6 +11,23 @@ public class SaveTwinTests
 
     private static DefenseKind Kind(string key) => DefenseRows.All.Single(kind => kind.Key == key);
 
+    // A defense whose rows were not added has an id the game cannot create, so its save must stay the stock defense
+    // and keep its marker for a later load.
+    [Fact]
+    public void ADefenseThatWasNotAddedStaysStockAndKeepsItsMarker()
+    {
+        var turret = Kind("Turret");
+        var save = new SaveTwin.Fields { AgentConfigId = turret.Ids.Furniture };
+
+        SaveTwin.ToStock(ref save, Kinds);
+        var (stock, marker) = (save.AgentConfigId, save.Name);
+
+        Assert.False(SaveTwin.FromStock(ref save, Kinds.Where(kind => kind != turret).ToList()));
+        Assert.Equal((stock, marker), (save.AgentConfigId, save.Name));
+        Assert.False(SaveTwin.ToStock(ref save, Kinds));
+        Assert.Equal(marker, save.Name);
+    }
+
     // Without the mod the game must find an id it knows, or the save does not load.
     [Theory]
     [InlineData("Barrier", 36001)]

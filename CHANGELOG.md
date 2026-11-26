@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.5
+
+- Fixed: if a defense could not be added to the game, for example because another mod uses the same id, loading a save with that defense in it could go wrong. Now it stays the stock defense it copies for that load and turns back once it can be added again.
+- Made for Survival Log 1.1.21671.
+
 ## 0.2.4
 
 - Mod Manager's Conflicts tab can now see what Defenses Expanded adds to the game, like the defenses and the defense skill levels that unlock them, so it can show when another mod changes the same things.

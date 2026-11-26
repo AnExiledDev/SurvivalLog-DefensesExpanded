@@ -59,6 +59,8 @@ internal static class SavePatches
         {
             if (__0 == null) return;
 
+            var kinds = DefenseTables.Written;
+
             for (var i = 0; i < __0.Count; i++)
             {
                 var save = __0[i];
@@ -67,7 +69,7 @@ internal static class SavePatches
 
                 var fields = Read(save);
 
-                if (SaveTwin.FromStock(ref fields, DefenseRows.All)) Write(save, fields);
+                if (SaveTwin.FromStock(ref fields, kinds)) Write(save, fields);
             }
         }
         catch (Exception ex)

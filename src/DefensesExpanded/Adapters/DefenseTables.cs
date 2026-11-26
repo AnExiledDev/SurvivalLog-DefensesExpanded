@@ -34,6 +34,13 @@ internal sealed class DefenseTables
     private readonly IntPtr[] _applied = new IntPtr[Watched];
     private readonly List<Reveal> _reveals = new();
     private HashSet<IntPtr> _ours = new();
+
+    /// <summary>
+    /// The defenses whose rows the last write added. A save only turns back into these: a defense whose rows were
+    /// skipped would have an id the game cannot create, so it stays the stock defense it was saved as and keeps its
+    /// marker until a later load can add it.
+    /// </summary>
+    public static IReadOnlyList<DefenseKind> Written { get; private set; } = Array.Empty<DefenseKind>();
     private IReadOnlyList<DefenseSettings>? _appliedSettings;
     private float _nextCheckAt;
     private float _nextRevealAt;
@@ -156,6 +163,8 @@ internal sealed class DefenseTables
         // Every list is rewritten, so a defense that could not be added this time leaves no entries behind.
         Step("game settings", () => SetGlobals(tables.Globals!, written.SelectMany(done => done.Globals).ToList()));
         Step("defense skill levels", () => SetUnlockLevels(tables.DefenseLevels, written.Select(done => (done.Kind, done.Settings)).ToList()));
+
+        Written = written.Select(done => done.Kind).ToList();
 
         if (written.Count == 0) return new List<DefenseKind>();
 
